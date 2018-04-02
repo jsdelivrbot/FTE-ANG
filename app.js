@@ -438,7 +438,8 @@ tuggerTracker.controller("myController",["$scope","$timeout","$mdDialog",functio
 		{
 			console.log("ERROR: ",e);
 		}
-		console.log("LLEGO UN MENSAJE")
+		console.log("LLEGO UN MENSAJE");
+		alert("LLEGO UN MENSAJE");
 	});
 
 	return false;
