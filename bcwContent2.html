@@ -1,0 +1,67 @@
+<md-dialog aria-label="Beacon">
+  <form ng-cloak>
+    <md-toolbar>
+      <div class="md-toolbar-tools">
+        <h2>Mango (Fruit)</h2>
+        <span flex></span>
+        <md-button class="md-icon-button" ng-click="cancel()">
+          <md-icon md-svg-src="img/icons/ic_close_24px.svg" aria-label="Close dialog"></md-icon>
+        </md-button>
+      </div>
+    </md-toolbar>
+
+    <md-dialog-content>
+      <div class="md-dialog-content">
+        <div layout-gt-xs="row">
+          <md-input-container class="md-block" flex-gt-xs>
+            <label>Referencia</label>
+            <input>
+          </md-input-container>
+        </div>
+
+
+      </div>
+
+      <md-list>
+        <!-- <md-list-item class="md-2-line" ng-repeat="item in todos"> -->
+        <md-list-item class="md-2-line">
+          <md-checkbox ng-model="item.done"></md-checkbox>
+          <div class="md-list-item-text">
+            <h2> chipid </h2>
+            <div layout-gt-xs = "row" layout-align = "center center">
+              <p> MINO: </p>
+              <input type="text" name="mino" value="0x0d000">
+            </div>
+            <div layout-gt-xs = "row">
+              <p> MARJ: </p>
+              <input type="text" name="marj" value="0x0000">
+            </div>
+
+            <div layout-gt-xs = "row">
+              <p> X: </p>
+              <input type="text" name="x" value = "0">
+            </div>
+
+            <div layout-gt-xs = "row">
+              <p> Y: </p>
+              <input type="text" name="y" value = "0">
+            </div>
+
+          </div>
+        </md-list-item>
+      </md-list>
+
+    </md-dialog-content>
+
+    <md-dialog-actions layout="row">
+      
+      <span flex></span>
+      <md-button ng-click="answer('not useful')">
+        cancelar
+      </md-button>
+      <md-button ng-click="answer('useful')">
+        guardar
+      </md-button>
+    </md-dialog-actions>
+  </form>
+</md-dialog>

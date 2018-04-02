@@ -1,0 +1,14 @@
+{
+  "name": "ft2-ang",
+  "version": "1.0.0",
+  "description": "First try to make a new aproach to tugger's front end ",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Octavio R. Paredes G.",
+  "license": "ISC",
+  "dependencies": {
+    "angular": "^1.6.9"
+  }
+}
