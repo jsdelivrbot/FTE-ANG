@@ -105,6 +105,11 @@ app.get('/bcwContent2.html',function(req,res)
 	res.sendFile(__dirname+'/bcwContent2.html');
 });
 
+app.get('/socket',function(req,res)
+{
+	res.sendFile(__dirname+'/node_modules/socket.io-client/dist/socket.io.js');
+});
+
 app.use(express.static(__dirname+'/public'))
 
 io.on('connection',function(socket)

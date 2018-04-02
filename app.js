@@ -9,7 +9,7 @@ tuggerTracker.controller("myController",["$scope","$timeout","$mdDialog",functio
 		alert("YOU CLICKED ME !!!");
 	}
 
-	$scope.showAdvanced = function(ev) {
+	$scope.showAdvanced2 = function(ev) {
 	    $mdDialog.show({
 	      	//controller: DialogController,
 	      	templateUrl: 'bcwContent2.html',
@@ -231,7 +231,7 @@ tuggerTracker.controller("myController",["$scope","$timeout","$mdDialog",functio
 		         	.attr("height", function (d) { return $scope.squareLength; })
 		         	.attr("class", cssClass)
 		         	// .on("click",function(){console.log("click",this);})
-		         	.on("click",$scope.showAdvanced())
+		         	.on("click",$scope.showAdvanced2)
 		         	.on("mouseover",function(){d3.select(this).attr("class","mouseovered");})
 		         	.on("mouseout",function(){d3.select(this).attr("class",cssClass)});
 	}	
@@ -355,6 +355,41 @@ tuggerTracker.controller("myController",["$scope","$timeout","$mdDialog",functio
 		$scope.drawMowerHistory2($scope.groups, $scope.scales, [$scope.start]);
 	}
 
+	$(window).on("resize.doResize", function (){
+		alert(window.innerWidth);
+
+		$scope.$apply(function(){
+			$scope.initEverything();
+		});
+  	});
+
+ $(function (){
+	var socket = io();
+	socket.on('chat message',function(msg){
+		try
+		{
+			var json = JSON.parse(msg);
+			console.log(msg);
+			var next = $scope.getNext2($scope.map,json)
+			if(next !== null)
+			{
+				if(next.type === "grass")
+				{
+					start = next;
+					$scope.drawMowerHistory2($scope.groups,$scope.scales,[start]);
+				}
+			}
+			console.log("TODO OK!");
+		}
+		catch(e)
+		{
+			console.log("ERROR: ",e);
+		}
+		console.log("LLEGO UN MENSAJE")
+	});
+
+	return false;
+});  
 
 
 }]);
