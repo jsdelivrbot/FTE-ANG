@@ -9,6 +9,7 @@
   "author": "Octavio R. Paredes G.",
   "license": "ISC",
   "dependencies": {
-    "angular": "^1.6.9"
+    "angular": "^1.6.9",
+    "d3": "^5.0.0"
   }
 }
