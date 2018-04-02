@@ -1,4 +1,3 @@
-alert("WELCOME");
 // MODULE
 var tuggerTracker = angular.module('tuggerTracker',['ngAria','ngMaterial']);
 
@@ -9,21 +8,67 @@ tuggerTracker.controller("myController",["$scope","$timeout","$mdDialog",functio
 		alert("YOU CLICKED ME !!!");
 	}
 
-	$scope.showAdvanced2 = function(ev) {
+	$scope.showAdvanced = function(ev) {
+
+		$scope.variableDemo = "hola";
+
 	    $mdDialog.show({
 	      	//controller: DialogController,
+	      	locals:{name: "hola!"},
 	      	templateUrl: 'bcwContent2.html',
 			parent: angular.element(document.body),
 			targetEvent: ev,
 			clickOutsideToClose:true,
-			fullscreen: $scope.customFullscreen // Only for -xs, -sm breakpoints.
+			fullscreen: $scope.customFullscreen, // Only for -xs, -sm breakpoints.
+			controller: ['$scope','name',function($scope,name){
+				$scope.name  = name;
+			}]
 	    })
 	    .then(function(answer) {
 			$scope.status = 'You said the information was "' + answer + '".';
 	    }, function() {
 			$scope.status = 'You cancelled the dialog.';
 	    });
+
+
+	    var mdDialogCtrl = function ($scope, dataToPass) { 
+		    $scope.mdDialogData = dataToPass  
+		}
 	};
+
+	$scope.createDialog = function(x,y)
+	{
+		var l = {x:x,y:y};
+		console.log("Dentro de createDialog, se guardo:",x,y);
+
+		var funcion = function(ev){
+		    $mdDialog.show({
+		      	//controller: DialogController,
+		      	locals:{vars: l},
+		      	templateUrl: 'bcwContent2.html',
+				parent: angular.element(document.body),
+				targetEvent: ev,
+				clickOutsideToClose:true,
+				fullscreen: $scope.customFullscreen, // Only for -xs, -sm breakpoints.
+				controller: ['$scope','vars',function($scope,vars){
+					$scope.x = vars.x;
+					$scope.y = vars.y;
+				}]
+		    })
+		    .then(function(answer) {
+				$scope.status = 'You said the information was "' + answer + '".';
+		    }, function() {
+				$scope.status = 'You cancelled the dialog.';
+		    });
+
+
+		    var mdDialogCtrl = function ($scope, dataToPass) { 
+			    $scope.mdDialogData = dataToPass  
+			}
+		};
+
+		return funcion;
+	}
 
 	$scope.getBlocks = function ()
 	{
@@ -50,7 +95,7 @@ tuggerTracker.controller("myController",["$scope","$timeout","$mdDialog",functio
 
 	$scope.createBlock = function (x,y,width,height,path)
 	{
-	//Se inicializa el objeto
+		//Se inicializa el objeto
 		var block = {};
 		/*Comienzan a agregarse propiedades, ubicacion con coordenadas X y Y*/
 		block.x = Math.floor(x);
@@ -218,7 +263,7 @@ tuggerTracker.controller("myController",["$scope","$timeout","$mdDialog",functio
 
 	$scope.drawCells = function(svgContainer, scales, data, cssClass) 
 	{
-
+		console.log("creating new cell");
 		var gridGroup = $scope.svgContainer.append("g");
 		var cells = gridGroup.selectAll("rect")
 		            .data(data)
@@ -231,9 +276,17 @@ tuggerTracker.controller("myController",["$scope","$timeout","$mdDialog",functio
 		         	.attr("height", function (d) { return $scope.squareLength; })
 		         	.attr("class", cssClass)
 		         	// .on("click",function(){console.log("click",this);})
-		         	.on("click",$scope.showAdvanced2)
+		         	.on("click",function(d) { 
+
+		         		console.log(d);
+		         		$scope.createDialog(d.x,d.y)();
+
+
+		         	})
 		         	.on("mouseover",function(){d3.select(this).attr("class","mouseovered");})
 		         	.on("mouseout",function(){d3.select(this).attr("class",cssClass)});
+
+     	console.log("LOS VALORES GUARDADOS FUERON: ",$scope.tempX,$scope.tempY);
 	}	
 	
 	$scope.drawMowerHistory2 = function(groups, scales, path) 
@@ -261,7 +314,7 @@ tuggerTracker.controller("myController",["$scope","$timeout","$mdDialog",functio
 	}
 
 
-	function getNext2(map, newPos) 
+	$scope.getNext2 = function(map, newPos) 
 	{
 		if(newPos.x<map.grid.length && newPos.x>=0 && newPos.y <map.grid[0].length && newPos.y>=0)
 		{
@@ -356,7 +409,7 @@ tuggerTracker.controller("myController",["$scope","$timeout","$mdDialog",functio
 	}
 
 	$(window).on("resize.doResize", function (){
-		alert(window.innerWidth);
+		//alert(window.innerWidth);
 
 		$scope.$apply(function(){
 			$scope.initEverything();

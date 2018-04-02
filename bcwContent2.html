@@ -27,7 +27,7 @@
         <md-list-item class="md-2-line">
           <md-checkbox ng-model="item.done"></md-checkbox>
           <div class="md-list-item-text">
-            <h2> chipid </h2>
+            <h2> chipid: {{ name }} </h2>
             <div layout-gt-xs = "row" layout-align = "center center">
               <p> MINO: </p>
               <input type="text" name="mino" value="0x0d000">
@@ -39,12 +39,12 @@
 
             <div layout-gt-xs = "row">
               <p> X: </p>
-              <input type="text" name="x" value = "0">
+              <input type="text" name="x" value = "0" ng-model = "x">
             </div>
 
             <div layout-gt-xs = "row">
               <p> Y: </p>
-              <input type="text" name="y" value = "0">
+              <input type="text" name="y" value = "0" ng-model = "y">
             </div>
 
           </div>
