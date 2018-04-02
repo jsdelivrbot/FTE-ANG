@@ -29,20 +29,20 @@ tuggerTracker.controller("myController",["$scope","$timeout","$mdDialog",functio
 	{
 		var bloques = [];
 
-		bloques.push(createBlock(0,0,14,34))
-		bloques.push(createBlock(17,3,31,6,"psg k2.jpg"))
-		bloques.push(createBlock(17,12,31,22,"psg linea princial.jpg"))
-		bloques.push(createBlock((51),3,5,31,"PSG FIFO.jpg"))
-		bloques.push(createBlock((59),3,30,31,"lineas.jpg"))
-		bloques.push(createBlock(0,0,5,70,"almacenes.jpg"))
-		bloques.push(createBlock((8),37,6,28))
-		bloques.push(createBlock(44,37,45,17,"war room.jpg"))
-		bloques.push(createBlock(17,37,24,8,"actuador.jpg"))
-		bloques.push(createBlock(17,47,24,8,"discos 3.jpg"))
-		bloques.push(createBlock(17,58,24,7,"discos 2.jpg"))
-		bloques.push(createBlock(44,58,36,6,"discos 1.jpg"))
-		bloques.push(createBlock(84,58,12,11,"oficinas 2.png"))
-		bloques.push(createBlock(8,69,87,9,"oficinas.png"))
+		bloques.push($scope.createBlock(0,0,14,34))
+		bloques.push($scope.createBlock(17,3,31,6,"psg k2.jpg"))
+		bloques.push($scope.createBlock(17,12,31,22,"psg linea princial.jpg"))
+		bloques.push($scope.createBlock((51),3,5,31,"PSG FIFO.jpg"))
+		bloques.push($scope.createBlock((59),3,30,31,"lineas.jpg"))
+		bloques.push($scope.createBlock(0,0,5,70,"almacenes.jpg"))
+		bloques.push($scope.createBlock((8),37,6,28))
+		bloques.push($scope.createBlock(44,37,45,17,"war room.jpg"))
+		bloques.push($scope.createBlock(17,37,24,8,"actuador.jpg"))
+		bloques.push($scope.createBlock(17,47,24,8,"discos 3.jpg"))
+		bloques.push($scope.createBlock(17,58,24,7,"discos 2.jpg"))
+		bloques.push($scope.createBlock(44,58,36,6,"discos 1.jpg"))
+		bloques.push($scope.createBlock(84,58,12,11,"oficinas 2.png"))
+		bloques.push($scope.createBlock(8,69,87,9,"oficinas.png"))
 
 		return bloques;
 	}
@@ -61,10 +61,10 @@ tuggerTracker.controller("myController",["$scope","$timeout","$mdDialog",functio
 
 		/*Se comiuenzan a describir ciertas propiedades de la imagen que corresponde a 
 		este bloque, que son: anchura, altura, ubicacion en pixeles en x y ubicacion en pixeles en y*/
-		block.imageWidth = (block.width+1)*squareLength;
-		block.imageHeight = (block.height+1)*squareLength;
-		block.imageX = (block.x*squareLength)+5;
-		block.imageY = (block.y*squareLength)+5;
+		block.imageWidth = (block.width+1)*$scope.squareLength;
+		block.imageHeight = (block.height+1)*$scope.squareLength;
+		block.imageX = (block.x*$scope.squareLength)+5;
+		block.imageY = (block.y*$scope.squareLength)+5;
 
 		/*Se corrobora la existencia del path*/
 		if(path!== undefined)
@@ -92,7 +92,7 @@ tuggerTracker.controller("myController",["$scope","$timeout","$mdDialog",functio
 		return x==0 || y == 0 || x == (gridSize.x-1) || y == (gridSize.y-1);
 	}
 
-	$scope.builMap2 = function (gridSize, ratios) 
+	$scope.buildMap2 = function (gridSize, ratios) 
 	{
 		/*map es un objeto que contiene cuatro arreglos los cuales guardan los valores 
 		de la cuadricula en general, los cuadros que son pasto, los cuadros que son piedra
@@ -171,7 +171,7 @@ tuggerTracker.controller("myController",["$scope","$timeout","$mdDialog",functio
 
 							console.log("offset: ",valOffset)
 
-							svgContainer.append('svg:image')
+							$scope.svgContainer.append('svg:image')
 							.attr('xlink:href', '/image/'+bloques[i].imagePath)
 							.attr(nameDim, valDim)
 							.attr("x", bloques[i].imageX)
@@ -219,16 +219,16 @@ tuggerTracker.controller("myController",["$scope","$timeout","$mdDialog",functio
 	$scope.drawCells = function(svgContainer, scales, data, cssClass) 
 	{
 
-		var gridGroup = svgContainer.append("g");
+		var gridGroup = $scope.svgContainer.append("g");
 		var cells = gridGroup.selectAll("rect")
 		            .data(data)
 		            .enter()
 		            .append("rect");
 		var cellAttributes = cells
-		         	.attr("x", function (d) { return scales.x(d.x); })
-		         	.attr("y", function (d) { return scales.y(d.y); })
-		         	.attr("width", function (d) { return squareLength; })
-		         	.attr("height", function (d) { return squareLength; })
+		         	.attr("x", function (d) { return $scope.scales.x(d.x); })
+		         	.attr("y", function (d) { return $scope.scales.y(d.y); })
+		         	.attr("width", function (d) { return $scope.squareLength; })
+		         	.attr("height", function (d) { return $scope.squareLength; })
 		         	.attr("class", cssClass)
 		         	// .on("click",function(){console.log("click",this);})
 		         	.on("click",$scope.showAdvanced())
@@ -244,14 +244,14 @@ tuggerTracker.controller("myController",["$scope","$timeout","$mdDialog",functio
 		    .append("circle")
 		    .attr("cx",function(d){return console.log("d",d);scales.x(d.x+0.5)})
 		    .attr("cy",function(d){return scales.y(d.y+0.5)})
-		    .attr("r",function(d){return circleRadius})
+		    .attr("r",function(d){return $scope.circleRadius})
 		    .attr("class",function(d){return "position"});
 
 		groups.position.selectAll("circle")
 		    .data(path)
 		    .attr("cx",function(d){return scales.x(d.x+0.5)})
 		    .attr("cy",function(d){return scales.y(d.y+0.5)})
-		    .attr("r",function(d){return circleRadius})
+		    .attr("r",function(d){return $scope.circleRadius})
 		    .attr("class",function(d){return "position"});
 		    
 
@@ -325,10 +325,11 @@ tuggerTracker.controller("myController",["$scope","$timeout","$mdDialog",functio
 		                          .append("svg")
 		                          .attr("width", $scope.svgSize.width)
 		                          .attr("height", $scope.svgSize.height);
+	
 		$scope.scales = $scope.getScale($scope.gridSize, $scope.svgSize);
 
 
-		$scope.map = $scope.buildMap2(gridSize, ratios);
+		$scope.map = $scope.buildMap2($scope.gridSize, $scope.ratios);
 
 		$scope.start = $scope.map.grid[4][77]
 
@@ -348,35 +349,15 @@ tuggerTracker.controller("myController",["$scope","$timeout","$mdDialog",functio
 		$scope.drawCells($scope.svgContainer, $scope.scales, $scope.map.rock, "rock");
 		$scope.drawCells($scope.svgContainer, $scope.scales, $scope.map.border, "border");
 
-		$scope.groups = { path:svgContainer.append("g"),
-		                position:svgContainer.append("g") };
+		$scope.groups = { path:$scope.svgContainer.append("g"),
+		                position:$scope.svgContainer.append("g") };
 
-		$scope.drawMowerHistory2(groups, scales, [start]);
+		$scope.drawMowerHistory2($scope.groups, $scope.scales, [$scope.start]);
 	}
 
 
 
 }]);
-
-// tuggerTracker.directive('tuggerMap', function ($parse) {
-// 	var directiveDefinitionObject = {
-// 		restrict: 'E',
-// 		replace: false,
-// 		link: function(scope, element, attrs){
-// 			var data = attrs.chartData.split(",");
-// 			alert(attrs.chartData);
-// 			var chart = d3.select(element[0]);
-// 			chart.append("div").attr("class", "chart")
-// 				.selectAll('div')
-// 				.data(data).enter().append("div")
-// 				// .transition().ease("elastic")
-// 				.style("width",function(d){ return d + "%";})
-// 				.on("click",scope.showAdvanced);
-// 		}
-// 	};
-// 	return directiveDefinitionObject;
-// });
-
 
 tuggerTracker.directive('tuggerMap', function ($parse) {
 	var directiveDefinitionObject = {
