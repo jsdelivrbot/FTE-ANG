@@ -34,8 +34,8 @@ var options = {
 };*/
 
 console.log("INTENTANDO CONECTAR");
-var client = mqtt.connect('http://m14.cloudmqtt.com',options);
-//var client = mqtt.connect('http://192.168.1.65');
+//var client = mqtt.connect('http://m14.cloudmqtt.com',options);
+var client = mqtt.connect('http://127.0.0.1');
 //console.log(client);
 
 var io = require('socket.io')(http);
