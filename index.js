@@ -48,7 +48,7 @@ client.on('connect',function(){
 	client.publish('presence','Hello mqtt');
 	client.subscribe('tugger');
 	socketOn = true;
-	
+
 });
 
 client.on('message',function(topic,message){
@@ -62,7 +62,7 @@ client.on('message',function(topic,message){
 			console.log("Objeto creado con exito: ",registro.chipid);
 
 		}
-		//io.emit('chat message',message.toString());
+		io.emit('chat message',message.toString());
 	}
 	console.log(topic,message);
 });
