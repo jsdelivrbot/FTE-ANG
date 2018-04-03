@@ -51,21 +51,109 @@ client.on('connect',function(){
 
 });
 
-client.on('message',function(topic,message){
-	//console.log(message.toString());
+// client.on('message',function(topic,message){
+// 	//console.log(message.toString());
+// 	if(socketOn)
+// 	{
+// 		if(topic === "tugger")
+// 		{
+// 			//HACER PARSE A OBJETO JSON
+// 			var registro = JSON.parse(message);
+// 			console.log("Objeto creado con exito: ",registro.chipid);
+
+// 		}
+// 		io.emit('chat message',message.toString());
+// 	}
+// 	console.log(topic,message);
+// });
+
+mqttCallback = function(topic,message)
+{
+
+	var registroNode = function(m)
+	{
+		var registerBeacon = function(chipid, mode, x, y, marj, mino)
+		{
+			MongoClient.connect(url, function(err, db) {
+				if (err) throw err;
+				var dbo = db.db("Tugger");
+				//var myobj = {"_id":"5ab194b0c38a9d343cc61ad7","marj":"123","mino":"456","x":2,"y":2,"mode":false,"chipid":"123456789"};
+
+				var objeto = {};
+
+				if(chipid != undefined)
+				{
+					objeto.chipid = chipid;
+				}
+
+				if(mode!= undefined)
+				{
+					objeto.mode = mode;
+				}
+
+				if(x!=undefined)
+				{
+					objeto.x = x;
+				}
+
+				if(y != undefined)
+				{
+					objeto.y = y;
+				}
+
+				if(marj!= undefined)
+				{
+					objeto.marj = marj;
+				}
+
+				if(mino != undefined)
+				{
+					objeto.mino = mino;
+				}
+
+				dbo.collection("Beacons").insertOne(objeto, function(err, res) {
+				if (err) throw err;
+				console.log("1 document inserted");
+				db.close();
+				});
+			});
+		}
+
+
+		var o;
+		try
+		{
+			o = JSON.parse(jsonString);
+		}catch(e)
+		{
+			console.log("error: pero haha lo cacche");
+		}
+
+		if(o!= undefined)
+		{
+			registerBeacon(o.chipid, o.mode, o.x, o.y, o.marj, o.mino);
+		}
+	}
+
+
 	if(socketOn)
 	{
-		if(topic === "tugger")
+		switch(topic)
 		{
-			//HACER PARSE A OBJETO JSON
-			var registro = JSON.parse(message);
-			console.log("Objeto creado con exito: ",registro.chipid);
-
+			case "tugger":
+			break;
+			case "node/register":
+				registroNode(message);
+				break;
+			case "presence":
+			break;
+			default:
+			break;
 		}
-		io.emit('chat message',message.toString());
 	}
-	console.log(topic,message);
-});
+}
+
+client.on('message',mqttCallback);
 
 client.on('error', function(err) {
     console.log(err);
