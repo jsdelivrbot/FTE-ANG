@@ -70,6 +70,10 @@ client.on('connect',function(){
 mqttCallback = function(topic,message)
 {
 
+	var MongoClient = require('mongodb').MongoClient;
+
+	var url = 'mongodb+srv://b08walls:53285329@cluster0-oo4wz.mongodb.net/test'
+
 	var registroNode = function(m)
 	{
 		var registerBeacon = function(chipid, mode, x, y, marj, mino)
@@ -111,7 +115,7 @@ mqttCallback = function(topic,message)
 					objeto.mino = mino;
 				}
 
-				dbo.collection("Beacons").insertOne(objeto, function(err, res) {
+				dbo.collection("beacons").insertOne(objeto, function(err, res) {
 				if (err) throw err;
 				console.log("1 document inserted");
 				db.close();
