@@ -60,9 +60,10 @@ tuggerTracker.controller("myController",["$scope","$timeout","$mdDialog",functio
 				targetEvent: ev,
 				clickOutsideToClose:true,
 				fullscreen: $scope.customFullscreen, // Only for -xs, -sm breakpoints.
-				controller: ['$scope','vars',function($scope,vars){
+				controller: ['$scope','vars','todos',function($scope,vars,todos){
 					$scope.x = vars.x;
 					$scope.y = vars.y;
+					$scope.todos = todos;
 				}]
 		    })
 		    .then(function(answer) {
