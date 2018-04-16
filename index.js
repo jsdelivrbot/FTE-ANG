@@ -35,7 +35,7 @@ var options = {
 
 console.log("INTENTANDO CONECTAR");
 //var client = mqtt.connect('http://m14.cloudmqtt.com',options);
-var client = mqtt.connect('http://127.0.0.1');
+var client = mqtt.connect('http://192.168.1.77');
 //console.log(client);
 
 var io = require('socket.io')(http);
@@ -72,7 +72,9 @@ mqttCallback = function(topic,message)
 
 	var MongoClient = require('mongodb').MongoClient;
 
-	var url = 'mongodb+srv://b08walls:53285329@cluster0-oo4wz.mongodb.net/test'
+	//var url = 'mongodb+srv://b08walls:53285329@cluster0-oo4wz.mongodb.net/test'
+
+	var url = 'mongodb://localhost:27017/';
 
 	var registroNode = function(m)
 	{
@@ -80,7 +82,8 @@ mqttCallback = function(topic,message)
 		{
 			MongoClient.connect(url, function(err, db) {
 				if (err) throw err;
-				var dbo = db.db("Tugger");
+				//var dbo = db.db("Tugger");
+				var dbo = db.db("mydb");
 				//var myobj = {"_id":"5ab194b0c38a9d343cc61ad7","marj":"123","mino":"456","x":2,"y":2,"mode":false,"chipid":"123456789"};
 
 				var objeto = {};
@@ -115,11 +118,30 @@ mqttCallback = function(topic,message)
 					objeto.mino = mino;
 				}
 
-				dbo.collection("beacons").insertOne(objeto, function(err, res) {
-				if (err) throw err;
-				console.log("1 document inserted");
-				db.close();
-				});
+				var query = {chipid:objeto.chipid};
+
+				dbo.collection("BeaconsInPlay").find(query).toArray(function(err,result)
+					{
+						if(err) throw err;
+						console.log(result);
+
+
+						if(result.length<=0){
+							dbo.collection("BeaconsInPlay").insertOne(objeto, function(err, res) {
+							if (err) throw err;
+							console.log("1 document inserted");
+							db.close();
+							});
+						}
+						else
+						{
+							console.log("BEACON YA REGISTRADO");
+						}
+					})
+
+
+
+
 			});
 		}
 
@@ -127,10 +149,17 @@ mqttCallback = function(topic,message)
 		var o;
 		try
 		{
-			o = JSON.parse(jsonString);
+			console.log(typeof(m));
+			var str = ""+m;
+			str = str.replace(/'/g,"\"");
+			str = str.replace(":",":\"");
+			str = str.replace("}","\"}");
+			// console.log(str,"primer reemplazo");
+			o = JSON.parse(str);
+			console.log("REGISTRO");
 		}catch(e)
 		{
-			console.log("error: pero haha lo cacche");
+			console.log("error: pero haha lo cacche",e.toString());
 		}
 
 		if(o!= undefined)

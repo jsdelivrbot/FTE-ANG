@@ -23,12 +23,12 @@
       </div>
 
       <md-list>
-        <!-- <md-list-item class="md-2-line" ng-repeat="item in todos"> -->
-        <md-list-item class="md-2-line">
+        <md-list-item class="md-2-line" ng-repeat="item in todos">
+        <!-- <md-list-item class="md-2-line"> -->
           <md-checkbox ng-model="item.done"></md-checkbox>
           <div class="md-list-item-text">
-            <h2> chipid: {{ name }} </h2>
-            <div layout-gt-xs = "row" layout-align = "center center">
+            <h2> chipid: {{ item.chipid }} </h2>
+            <!-- <div layout-gt-xs = "row" layout-align = "center center">
               <p> MINO: </p>
               <input type="text" name="mino" value="0x0d000">
             </div>
@@ -45,7 +45,7 @@
             <div layout-gt-xs = "row">
               <p> Y: </p>
               <input type="text" name="y" value = "0" ng-model = "y">
-            </div>
+            </div> -->
 
           </div>
         </md-list-item>

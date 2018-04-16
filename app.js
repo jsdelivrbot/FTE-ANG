@@ -41,10 +41,20 @@ tuggerTracker.controller("myController",["$scope","$timeout","$mdDialog",functio
 		var l = {x:x,y:y};
 		console.log("Dentro de createDialog, se guardo:",x,y);
 
+		//var MongoClient = require('mongodb').MongoClient;
+		var url = 'mongodb://localhost:27017/';
+
+
+
 		var funcion = function(ev){
 		    $mdDialog.show({
 		      	//controller: DialogController,
-		      	locals:{vars: l},
+		      	locals:{vars: l, todos:[
+		      		{chipid:"12344321"},
+		      		{chipid:"43211234"},
+		      		{chipid:"14233241"},
+		      		{chipid:"11223344"}
+		      	]},
 		      	templateUrl: 'bcwContent2.html',
 				parent: angular.element(document.body),
 				targetEvent: ev,
