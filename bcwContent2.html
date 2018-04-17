@@ -2,7 +2,7 @@
   <form ng-cloak>
     <md-toolbar>
       <div class="md-toolbar-tools">
-        <h2>Mango (Fruit)</h2>
+        <h2>Beacons Disponibles</h2>
         <span flex></span>
         <md-button class="md-icon-button" ng-click="cancel()">
           <!-- <md-icon md-svg-src="img/icons/ic_close_24px.svg" aria-label="Close dialog"></md-icon> -->
@@ -25,19 +25,29 @@
       <md-list>
         <md-list-item class="md-2-line" ng-repeat="item in todos">
         <!-- <md-list-item class="md-2-line"> -->
-          <md-checkbox ng-model="item.done"></md-checkbox>
+          <md-checkbox ng-model="item.done" ng-click="checkBoxClick(item.done,item)"></md-checkbox>
           <div class="md-list-item-text">
             <h2> chipid: {{ item.chipid }} </h2>
-            <!-- <div layout-gt-xs = "row" layout-align = "center center">
+            <div layout-gt-xs = "row">
               <p> MINO: </p>
-              <input type="text" name="mino" value="0x0d000">
+              <input type="text" name="mino" ng-model="item.mino">
             </div>
             <div layout-gt-xs = "row">
               <p> MARJ: </p>
-              <input type="text" name="marj" value="0x0000">
+              <input type="text" name="marj" ng-model="item.marj">
             </div>
 
             <div layout-gt-xs = "row">
+              <p> MODE (checked = programmer, unchecked = scanner): </p>
+              
+            </div>
+
+            <div layout-gt-xs = "row">
+              <input type="checkbox" name="" ng-model="item.modeBool" ng-click="modeCheckBoxClick(item)">
+              <p> {{ item.mode }} </p>
+            </div>
+
+            <!-- <div layout-gt-xs = "row">
               <p> X: </p>
               <input type="text" name="x" value = "0" ng-model = "x">
             </div>
@@ -56,10 +66,10 @@
     <md-dialog-actions layout="row">
       
       <span flex></span>
-      <md-button ng-click="answer('not useful')">
+      <md-button ng-click="answer(false)">
         cancelar
       </md-button>
-      <md-button ng-click="answer('useful')">
+      <md-button ng-click="answer(true)">
         guardar
       </md-button>
     </md-dialog-actions>

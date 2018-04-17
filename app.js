@@ -41,20 +41,32 @@ tuggerTracker.controller("myController",["$scope","$timeout","$mdDialog",functio
 		var l = {x:x,y:y};
 		console.log("Dentro de createDialog, se guardo:",x,y);
 
-		//var MongoClient = require('mongodb').MongoClient;
-		var url = 'mongodb://localhost:27017/';
+		var xmlHttp = new XMLHttpRequest();
 
 
+
+		xmlHttp.open("GET","http://localhost:5000/demoMongo",false);
+
+		xmlHttp.send(null);
+
+		console.log(xmlHttp.responseText);
+
+		var arregloDemo = xmlHttp.responseText.match(/{.+?}/g);
+
+		var valoresDialogo = []
+
+		arregloDemo.forEach(function(item){
+			valoresDialogo.push(JSON.parse(item));
+		});
+
+		valoresDialogo.forEach(function(item){
+			item.modeBool = item.mode === "programmer";
+		});
 
 		var funcion = function(ev){
 		    $mdDialog.show({
 		      	//controller: DialogController,
-		      	locals:{vars: l, todos:[
-		      		{chipid:"12344321"},
-		      		{chipid:"43211234"},
-		      		{chipid:"14233241"},
-		      		{chipid:"11223344"}
-		      	]},
+		      	locals:{vars: l, todos:valoresDialogo},
 		      	templateUrl: 'bcwContent2.html',
 				parent: angular.element(document.body),
 				targetEvent: ev,
@@ -64,12 +76,82 @@ tuggerTracker.controller("myController",["$scope","$timeout","$mdDialog",functio
 					$scope.x = vars.x;
 					$scope.y = vars.y;
 					$scope.todos = todos;
+
+					$scope.checkBoxClick = function(estado,elemento){
+
+						$scope.todos.forEach(function(x){
+							x.done  = false;
+						})
+
+						if(estado)
+						{
+							elemento.done = true;
+						}
+					}
+
+					$scope.modeCheckBoxClick = function(item){
+						if(item.modeBool){
+							item.mode = "programmer";
+						}
+						else{
+							item.mode = "scanner";
+						}
+					}
+
+					$scope.answer = function(seleccion)
+					{
+						if(seleccion){
+							$scope.todos.forEach(function(item){
+								
+								var nuevosValores = {};
+								var nuevosValoresJsonString = "";
+								nuevosValores.chipid = item.chipid;
+
+								console.log("VALOR DE LOS CHECKBOX: ",item.modeBool);
+
+								if(item.done){
+									console.log(item.chipid, "ha sido seleccionado");
+
+									nuevosValores.x = $scope.x;
+									nuevosValores.y = $scope.y;
+
+
+									// xmlHttp.open("GET","http://localhost:5000/updateBeacon?x="+$scope.x+"&y="+$scope.y+"&chipid="+item.chipid,true);
+									// xmlHttp.open("GET","http://localhost:5000/updateBeacon?nuevosValores="+nuevosValoresJsonString,true);
+
+
+									//console.log(xmlHttp.responseText);
+								}
+								else
+								{
+									console.log(item.chipid, "esta deseleccionado");
+								}
+
+								if(item.marj == undefined){
+									nuevosValores.marj = "CACA";
+								}else{
+									nuevosValores.marj = item.marj;
+									console.log("marj en navegador: ",item.marj);
+								}
+
+								if(item.mino == undefined){
+									nuevosValores.mino = "BEBE";
+								}else{
+									nuevosValores.mino = item.mino;
+									console.log("mino en navegador: ",item.mino);
+								}
+
+								nuevosValores.mode = item.mode;
+
+								nuevosValoresJsonString = JSON.stringify(nuevosValores);
+								xmlHttp.open("GET","http://localhost:5000/updateBeacon?nuevosValores="+nuevosValoresJsonString,true);
+								xmlHttp.send(null);
+
+							})
+						}
+						$mdDialog.hide();
+					}
 				}]
-		    })
-		    .then(function(answer) {
-				$scope.status = 'You said the information was "' + answer + '".';
-		    }, function() {
-				$scope.status = 'You cancelled the dialog.';
 		    });
 
 
