@@ -28,11 +28,11 @@
           <md-checkbox ng-model="item.done" ng-click="checkBoxClick(item.done,item)"></md-checkbox>
           <div class="md-list-item-text">
             <h2> chipid: {{ item.chipid }} </h2>
-            <div layout-gt-xs = "row">
+            <div layout-gt-xs = "row" ng-show="item.modeBool" class = "ng-hide">
               <p> MINO: </p>
               <input type="text" name="mino" ng-model="item.mino">
             </div>
-            <div layout-gt-xs = "row">
+            <div layout-gt-xs = "row" ng-show="item.modeBool" class = "ng-hide">
               <p> MARJ: </p>
               <input type="text" name="marj" ng-model="item.marj">
             </div>

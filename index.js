@@ -6,6 +6,9 @@ var app = require('express')();
 var http = require('http').Server(app);
 var mqtt = require('mqtt');
 
+
+var comandosPendientes = [];
+
 var options = {
     port: 10246,
     host: 'm14.cloudmqtt.com',
@@ -221,6 +224,9 @@ mqttCallback = function(topic,message)
 		switch(topic)
 		{
 			case "tugger":
+
+				//--AQUI DEBE SER COLOCADO EL CODIGO PARA LOS MENSAJES DEL TUGGER
+
 			break;
 			case "node/register":
 				registroNode(message);
@@ -322,6 +328,77 @@ app.get('/updateBeacon',function(req,res){
 
 		var nuevosValoresObjeto = JSON.parse(req.query.nuevosValores);
 		console.log("LOS NUEVOS VALORES EN EL OBJETO SON: ",nuevosValoresObjeto);
+		var viejosValores = [];
+
+		MongoClient.connect(url, function(err,db){
+			if (err) throw err;
+
+			var dbo = db.db("mydb");
+			dbo.collection("BeaconsInPlay").find({chipid:nuevosValoresObjeto.chipid}).toArray(function(err,res){
+				if (err) throw err;
+
+				viejosValores = res;
+
+				var cambios = Object.keys(nuevosValoresObjeto);
+
+				cambios.forEach(function(item){
+
+					if(nuevosValoresObjeto[item] != viejosValores[0][item]){
+						console.log("LOS VALORES A ANALIZAR SI SON DIFERENTES FUERON: ",nuevosValoresObjeto[item],viejosValores[0][item]);
+						switch(item){
+							case 'mode':
+								if(nuevosValoresObjeto.mode == "scanner"){
+
+									console.log("^^^^^^^^^^ SE MANDA A CONFIGURAR BT COMO SCANNER");
+									client.publish('nodeCode/'+nuevosValoresObjeto.chipid,'{"command":1,"load":"manager.setMode(SCANNER)"}');
+
+									setTimeout(function(){
+										client.publish('nodeCode/'+nuevosValoresObjeto.chipid,'{"command":0,"load":1}');
+									},1500);
+
+								}
+								else{
+									client.publish('nodeCode/'+nuevosValoresObjeto.chipid,'{"command":0,"load":0}');
+
+									setTimeout(function(){
+
+										client.publish('nodeCode/'+nuevosValoresObjeto.chipid,'{"command":1,"load":"manager.setMode(BEACON"}')
+
+									},5000);
+								}
+							break;
+
+							case 'marj':
+								if(viejosValores.mode != "scanner"){
+									client.publish('nodeCode/'+nuevosValoresObjeto.chipid,'{"command":1,"load":"manager.sendAtCommand(\'MARJ\',\'0x'+nuevosValoresObjeto.marj+'\')"}');
+								}
+								else{
+									setTimeout(function(){
+										client.publish('nodeCode/'+nuevosValoresObjeto.chipid,'{"command":1,"load":"manager.sendAtCommand(\'MARJ\',\'0x'+nuevosValoresObjeto.marj+'\')"}');
+									},1000);
+								}
+							break;
+
+							case 'mino':
+								if(viejosValores.mode != "scanner"){
+									client.publish('nodeCode/'+nuevosValoresObjeto.chipid,'{"command":1,"load":"manager.sendAtCommand(\'MINO\',\'0x'+nuevosValoresObjeto.mino+'\')"}');
+								}
+								else{
+									setTimeout(function(){
+										client.publish('nodeCode/'+nuevosValoresObjeto.chipid,'{"command":1,"load":"manager.sendAtCommand(\'MARJ\',\'0x'+nuevosValoresObjeto.marj+'\')"}');
+									},1000);	
+								}
+							break;
+
+						}
+
+					}
+
+				});
+			});
+		});
+
+
 
 		MongoClient.connect(url,function(err,db){
 			if(err)throw err;
@@ -335,6 +412,10 @@ app.get('/updateBeacon',function(req,res){
 				db.close();
 			});
 		});
+
+		
+
+
 
 		console.log("X",req.query.x,"Y", req.query.y);
 	}
@@ -387,6 +468,9 @@ http.listen(3000,function()
 {
 	console.log('listening on *:3000');
 });*/
+
+
+
 
 http.listen(PORT,function(){console.log("INIT OK!")})
 
