@@ -219,6 +219,49 @@ mqttCallback = function(topic,message)
 	}
 
 
+	var tuggerTracking = function(m)
+	{
+		var o;
+		try
+		{
+			console.log(typeof(m));
+			var str = ""+m;
+
+			console.log("STRING ORIGINAL",str);
+
+			str = str.replace(/'/g,"\"");
+			//str = str.replace(/:[^"]/,":\"");
+			//str = str.replace("}","\"}");
+			var correcciones = str.match(/:[^"]*.?[,}]/g,str)
+
+			correcciones.forEach(function(x){
+				var __temp = x.replace(/:/g,':"');
+				__temp = __temp.replace(/}/g,'"}');
+				__temp = __temp.replace(/,/g,'",');
+				str = str.replace(x,__temp);
+				// console.log(x,__temp);
+			})
+			console.log("STRING CORREGIDO: ",str);
+			o = JSON.parse(str);
+			console.log("REGISTRO");
+		}catch(e)
+		{
+			console.log("error: pero haha lo cacche",e.toString());
+		}
+
+		if(o!= undefined)
+		{
+
+			// if(parseInt(o.minLoad,16) == parseInt("CACA",16) && parseInt(o.maxLoad,16) == parseInt("BEBE",16)){
+			if(parseInt(o.minLoad,16) == 6081 && parseInt(o.maxLoad,16) == 15){
+				io.emit('updates',o);
+				console.log(o);
+			}
+
+		}
+	}
+
+
 	if(socketOn)
 	{
 		switch(topic)
@@ -226,7 +269,7 @@ mqttCallback = function(topic,message)
 			case "tugger":
 
 				//--AQUI DEBE SER COLOCADO EL CODIGO PARA LOS MENSAJES DEL TUGGER
-
+				tuggerTracking(message);
 			break;
 			case "node/register":
 				registroNode(message);

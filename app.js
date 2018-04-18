@@ -3,93 +3,112 @@ var tuggerTracker = angular.module('tuggerTracker',['ngAria','ngMaterial']);
 
 tuggerTracker.controller("myController",["$scope","$timeout","$mdDialog",function($scope,$timeout,$mdDialog){
 
-	$scope.clickMe = function()
+
+	$scope.datos = {};
+
+	$scope.xmlHttp = new XMLHttpRequest();
+
+	$scope.xmlHttp.open("GET","http://localhost:5000/demoMongo",false);
+
+	$scope.xmlHttp.send(null);
+
+	console.log($scope.xmlHttp.responseText);
+
+	var arregloDemo = $scope.xmlHttp.responseText.match(/{.+?}/g);
+
+	$scope.valoresDialogo = []
+
+	$scope.arregloDeDatos = []
+
+	arregloDemo.forEach(function(item){
+		$scope.valoresDialogo.push(JSON.parse(item));
+	});
+
+	console.log("valoresDialogo: ", $scope.valoresDialogo);
+
+	for(var i = 0;i<$scope.valoresDialogo.length;i++)
 	{
-		alert("YOU CLICKED ME !!!");
+		$scope.datos[$scope.valoresDialogo[i].chipid] = $scope.valoresDialogo[i];
+		$scope.datos[$scope.valoresDialogo[i].chipid].distancia = 1000;
+		$scope.datos[$scope.valoresDialogo[i].chipid].latency = 0;
+		$scope.datos[$scope.valoresDialogo[i].chipid].past = 0;
+		//$scope.datos[$scope.valoresDialogo[i].chipid].lugar = $scope.valoresDialogo[];
 	}
 
-	$scope.showAdvanced = function(ev) {
-
-		$scope.variableDemo = "hola";
-
-	    $mdDialog.show({
-	      	//controller: DialogController,
-	      	locals:{name: "hola!"},
-	      	templateUrl: 'bcwContent2.html',
-			parent: angular.element(document.body),
-			targetEvent: ev,
-			clickOutsideToClose:true,
-			fullscreen: $scope.customFullscreen, // Only for -xs, -sm breakpoints.
-			controller: ['$scope','name',function($scope,name){
-				$scope.name  = name;
-			}]
-	    })
-	    .then(function(answer) {
-			$scope.status = 'You said the information was "' + answer + '".';
-	    }, function() {
-			$scope.status = 'You cancelled the dialog.';
-	    });
+	console.log("$scope.datos",$scope.datos);
 
 
-	    var mdDialogCtrl = function ($scope, dataToPass) { 
-		    $scope.mdDialogData = dataToPass  
-		}
-	};
+	/*Esta funcion se encarga de crear el dialogo de configuración con el cual se cambian los parametros de cada uno
+	de los smart beacons.*/
 
-	$scope.createDialog = function(x,y)
+	$scope.createDialog = function(x,y)//La funcion espera dos parametros que son las coordenadas donde se asingara el beacon
 	{
-		var l = {x:x,y:y};
-		console.log("Dentro de createDialog, se guardo:",x,y);
-
+		var l = {x:x,y:y};//las coordenadas son guardadas en la variable local l que es un objeto
+		
+		/*Se crea un objeto xmlHttp el cual tiene la funcion de realizar peticiones GET al servidor y obtener valores de la 
+		base de datos*/
 		var xmlHttp = new XMLHttpRequest();
 
-
-
+		/*Se abre una coneccion donde se solicita al servidor obtener todos los beacons registrados, esto ocurre de forma sincrona*/
 		xmlHttp.open("GET","http://localhost:5000/demoMongo",false);
-
 		xmlHttp.send(null);
 
-		console.log(xmlHttp.responseText);
+		//Linea de debugging que permite ver el resultado obtenido durante la peticion, descomentar para reactivar
+		//console.log(xmlHttp.responseText);
 
-		var arregloDemo = xmlHttp.responseText.match(/{.+?}/g);
+		/*Dentro de la variable arrglo demo se guarda la respuesta como un arreglo */
+		var stringsValoresBeacons = xmlHttp.responseText.match(/{.+?}/g);
 
+		/*Se crea un arreglo donde se guardaran los objetos creados a partir de los strings*/
 		var valoresDialogo = []
 
-		arregloDemo.forEach(function(item){
+		/*Por medio de la funcion forEach se recorre cada uno de los strings guardados, se convierten a objetos y se guardan*/
+		stringsValoresBeacons.forEach(function(item){
 			valoresDialogo.push(JSON.parse(item));
 		});
 
+		/*Una vez guardados los valores estos se recorren y se crea el atributo modeBool en cada uno de los objetos guardados
+		esto con el fin de la interfaz grafica*/
 		valoresDialogo.forEach(function(item){
 			item.modeBool = item.mode === "programmer";
 		});
 
+		/*Esta es la funcion que sera retornada por el metodo y que se asignara a la funcion "onClick" de cada uno de los recuadros
+		del mapa, esto es necesario para poder pasar las coordenadas de cada recuadro*/
 		var funcion = function(ev){
+			//Se crea el objeto del dialogo y se le solicita se muestre con los parametros asignados.
 		    $mdDialog.show({
-		      	//controller: DialogController,
+		      	//Variables locales utilizadas dentro del controlador particular del dialogo
 		      	locals:{vars: l, todos:valoresDialogo},
-		      	templateUrl: 'bcwContent2.html',
-				parent: angular.element(document.body),
-				targetEvent: ev,
-				clickOutsideToClose:true,
-				fullscreen: $scope.customFullscreen, // Only for -xs, -sm breakpoints.
+		      	templateUrl: 'bcwContent2.html',//archivo html que va a mostrar dentro del dialogo
+				parent: angular.element(document.body),//Se le indica al dialogo cual su elemento padre, en este caso la pagina principal
+				targetEvent: ev,//se le dice cual sera el elemento de target
+				clickOutsideToClose:true,//se especifica que un click fuera del recuadro permitira que este se cierre
+				fullscreen: $scope.customFullscreen, // 
+				/*Se declara y se crea el controlador correspondiente al dialogo, aqui se asignan las variables que espera*/
 				controller: ['$scope','vars','todos',function($scope,vars,todos){
-					$scope.x = vars.x;
-					$scope.y = vars.y;
-					$scope.todos = todos;
+					$scope.x = vars.x;//dentro del scope del dialogo se guarda la variable x
+					$scope.y = vars.y;//dentro del scope del dialogo se guarda la variable y
+					$scope.todos = todos;//dentro del scope del dialgo se guarda la informacion de los beacons obtenida de la base de datos
 
+					/*Metodo utilizado para responder a los clicks del checkbox de la lista*/
 					$scope.checkBoxClick = function(estado,elemento){
 
+						//aqui se deseleccionan todos los elementos
 						$scope.todos.forEach(function(x){
 							x.done  = false;
 						})
 
+						//Aqui se selecciona solo aquel elemento al que se le hizo click
 						if(estado)
 						{
 							elemento.done = true;
 						}
 					}
 
+					/*Este metodo es el encargado de llevar acabo las acciones necesarias cuando se selecciona el modo bajo el cual opera el beacon*/
 					$scope.modeCheckBoxClick = function(item){
+						/*Por medio de este if usando el atributo modeBool se cambia el valor en el objeto correspondiente y a su vez el texto en la interfaz*/
 						if(item.modeBool){
 							item.mode = "programmer";
 						}
@@ -98,9 +117,12 @@ tuggerTracker.controller("myController",["$scope","$timeout","$mdDialog",functio
 						}
 					}
 
+					/*Este es el metodo que se manda a llamar cuando el usuario cierra la ventana por medio de los botones "cancelar" o "guardar"*/
 					$scope.answer = function(seleccion)
 					{
+						/*Si el boton precionado fue guardar*/
 						if(seleccion){
+							/*Entonces se verificaran todos los elementos dentro de la lista para registrar los cambios en la base de datos*/
 							$scope.todos.forEach(function(item){
 								
 								var nuevosValores = {};
@@ -511,28 +533,58 @@ tuggerTracker.controller("myController",["$scope","$timeout","$mdDialog",functio
 
  $(function (){
 	var socket = io();
-	socket.on('chat message',function(msg){
-		try
-		{
-			var json = JSON.parse(msg);
-			console.log(msg);
-			var next = $scope.getNext2($scope.map,json)
-			if(next !== null)
-			{
-				if(next.type === "grass")
-				{
-					start = next;
-					$scope.drawMowerHistory2($scope.groups,$scope.scales,[start]);
-				}
-			}
-			console.log("TODO OK!");
-		}
-		catch(e)
-		{
-			console.log("ERROR: ",e);
-		}
-		console.log("LLEGO UN MENSAJE");
-		alert("LLEGO UN MENSAJE");
+	// socket.on('chat message',function(msg){
+	// 	try
+	// 	{
+	// 		var json = JSON.parse(msg);
+	// 		console.log(msg);
+	// 		var next = $scope.getNext2($scope.map,json)
+	// 		if(next !== null)
+	// 		{
+	// 			if(next.type === "grass")
+	// 			{
+	// 				start = next;
+	// 				$scope.drawMowerHistory2($scope.groups,$scope.scales,[start]);
+	// 			}
+	// 		}
+	// 		console.log("TODO OK!");
+	// 	}
+	// 	catch(e)
+	// 	{
+	// 		console.log("ERROR: ",e);
+	// 	}
+	// 	console.log("LLEGO UN MENSAJE");
+	// 	alert("LLEGO UN MENSAJE");
+	// });
+	
+
+	var socket = io();
+	socket.on('updates',function(msg){
+		$scope.$apply(function(){
+			$scope.datos[msg.chipid].distancia = parseFloat(msg.distancia);
+			var lastTime = new Date();
+
+			var dateTime = ""+ lastTime.getHours() + ":" + lastTime.getMinutes() + ":" + lastTime.getSeconds();
+			$scope.datos[msg.chipid].time = dateTime;
+
+			var newPast = Date.now()
+			console.log("NOW: ",newPast);
+			var actual = newPast - $scope.datos[msg.chipid].past;
+			$scope.datos[msg.chipid].latency = actual;
+			$scope.datos[msg.chipid].past = newPast;
+			console.log("OBJETO DATOS: ",$scope.datos);
+			$scope.arregloDeDatos = Object.keys($scope.datos).map(i => $scope.datos[i]);
+
+			//console.log("arregloDeDatos",$scope.arregloDeDatos);
+			$scope.arregloDeDatos.sort(function(a,b){
+				return parseFloat(a.distancia)-parseFloat(b.distancia);
+			});
+		});
+
+		// alert("LLEGO UN MENSAJE");
+
+		console.log("DATOS: ",$scope.arregloDeDatos)
+		//console.log($scope.valoresDialogo);
 	});
 
 	return false;
