@@ -479,6 +479,12 @@ app.get('/app.js',function(req,res)
 	res.sendFile(__dirname+'/app.js');
 });
 
+app.get('/sideBar.js',function(req,res)
+{
+	//res.send('<h1>Hello world</h1>');
+	res.sendFile(__dirname+'/sideBar.js');
+});
+
 app.get('/bcwContent2.html',function(req,res)
 {
 	res.sendFile(__dirname+'/bcwContent2.html');
