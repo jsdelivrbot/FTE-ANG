@@ -431,6 +431,39 @@ tuggerTracker.controller("myController",["$scope","$timeout","$mdDialog",functio
 		    .exit().remove();
 	}
 
+	$scope.drawMowerHistory3 = function(groups, scales, path) 
+	{
+
+		groups.position.select("circle")
+		    .data(path)
+		    .enter()
+		    .append("circle")
+		    .attr("cx",function(d){return console.log("d",d);scales.x(d.x+0.5)})
+		    .attr("cy",function(d){return scales.y(d.y+0.5)})
+		    .attr("r",function(d){return $scope.circleRadius})
+		    .attr("class",function(d){return "position"});
+
+		groups.position.select("circle")
+		    .data(path)
+		    .transition()
+		    .duration(1500)
+		    // .attr("delay",function(d,i){return 5000})
+		    // .attr("duration",function(d,i){return 2000})
+		    .attr("cx",function(d){return scales.x(d.x+0.5)})
+		    .transition()
+		    // .attr("delay",function(d,i){return 5000})
+		    // .attr("duration",function(d,i){return 2000})
+		    .attr("cy",function(d){return scales.y(d.y+0.5)})
+		    .attr("r",function(d){return $scope.circleRadius})
+		    .attr("class",function(d){return "position"});
+		    
+
+		groups.position.select("circle")
+		    .data([path])
+		    .exit().remove();
+
+	}
+
 
 	$scope.getNext2 = function(map, newPos) 
 	{
@@ -593,7 +626,7 @@ tuggerTracker.controller("myController",["$scope","$timeout","$mdDialog",functio
 
 				console.log("LOS NUEVOS VALORES DEL TUGGER SON: X: ",nuevos.x, " Y: ",nuevos.y)
 				//$scope.start = $scope.map.grid[4][77]
-				$scope.drawMowerHistory2($scope.groups, $scope.scales, [$scope.map.grid[nuevos.x][nuevos.y]]);
+				$scope.drawMowerHistory3($scope.groups, $scope.scales, [$scope.map.grid[nuevos.x][nuevos.y]]);
 
 				$scope.datos[msg.chipid].timer = $scope.createTimer(function(){
 					$scope.datos[msg.chipid].distancia = 1000;
