@@ -14,13 +14,16 @@ tuggerTracker.controller("myController",["$scope","$timeout","$mdDialog",functio
 
 	console.log($scope.xmlHttp.responseText);
 
-	var arregloDemo = $scope.xmlHttp.responseText.match(/{.+?}/g);
+	$scope.arregloDemo = $scope.xmlHttp.responseText.match(/{.+?}/g);
 
 	$scope.valoresDialogo = []
 
 	$scope.arregloDeDatos = []
 
-	arregloDemo.forEach(function(item){
+	console.log("arregloDemo: ",$scope.arregloDemo);
+
+	$scope.arregloDemo.forEach(function(item){
+		console.log("STRING JSON: ",item,"OBJETO JSON: ",JSON.parse(item));
 		$scope.valoresDialogo.push(JSON.parse(item));
 	});
 
@@ -531,67 +534,104 @@ tuggerTracker.controller("myController",["$scope","$timeout","$mdDialog",functio
 		});
   	});
 
- $(function (){
-	var socket = io();
-	// socket.on('chat message',function(msg){
-	// 	try
-	// 	{
-	// 		var json = JSON.parse(msg);
-	// 		console.log(msg);
-	// 		var next = $scope.getNext2($scope.map,json)
-	// 		if(next !== null)
-	// 		{
-	// 			if(next.type === "grass")
-	// 			{
-	// 				start = next;
-	// 				$scope.drawMowerHistory2($scope.groups,$scope.scales,[start]);
-	// 			}
-	// 		}
-	// 		console.log("TODO OK!");
-	// 	}
-	// 	catch(e)
-	// 	{
-	// 		console.log("ERROR: ",e);
-	// 	}
-	// 	console.log("LLEGO UN MENSAJE");
-	// 	alert("LLEGO UN MENSAJE");
-	// });
-	
+	$(function (){
+		var socket = io();
+		// socket.on('chat message',function(msg){
+		// 	try
+		// 	{
+		// 		var json = JSON.parse(msg);
+		// 		console.log(msg);
+		// 		var next = $scope.getNext2($scope.map,json)
+		// 		if(next !== null)
+		// 		{
+		// 			if(next.type === "grass")
+		// 			{
+		// 				start = next;
+		// 				$scope.drawMowerHistory2($scope.groups,$scope.scales,[start]);
+		// 			}
+		// 		}
+		// 		console.log("TODO OK!");
+		// 	}
+		// 	catch(e)
+		// 	{
+		// 		console.log("ERROR: ",e);
+		// 	}
+		// 	console.log("LLEGO UN MENSAJE");
+		// 	alert("LLEGO UN MENSAJE");
+		// });
+		
 
-	var socket = io();
-	socket.on('updates',function(msg){
-		$scope.$apply(function(){
-			$scope.datos[msg.chipid].distancia = parseFloat(msg.distancia);
-			var lastTime = new Date();
+		var socket = io();
+		socket.on('updates',function(msg){
+			$scope.$apply(function(){
 
-			var dateTime = ""+ lastTime.getHours() + ":" + lastTime.getMinutes() + ":" + lastTime.getSeconds();
-			$scope.datos[msg.chipid].time = dateTime;
+				if($scope.datos[msg.chipid].timer){
+					$scope.datos[msg.chipid].timer.onOff = false;
+				}
 
-			var newPast = Date.now()
-			console.log("NOW: ",newPast);
-			var actual = newPast - $scope.datos[msg.chipid].past;
-			$scope.datos[msg.chipid].latency = actual;
-			$scope.datos[msg.chipid].past = newPast;
-			console.log("OBJETO DATOS: ",$scope.datos);
-			$scope.arregloDeDatos = Object.keys($scope.datos).map(i => $scope.datos[i]);
+				$scope.datos[msg.chipid].distancia = parseFloat(msg.distancia);
+				var lastTime = new Date();
 
-			//console.log("arregloDeDatos",$scope.arregloDeDatos);
-			$scope.arregloDeDatos.sort(function(a,b){
-				return parseFloat(a.distancia)-parseFloat(b.distancia);
+
+				var dateTime = ""+ lastTime.getHours() + ":" + lastTime.getMinutes() + ":" + lastTime.getSeconds();
+				$scope.datos[msg.chipid].time = dateTime;
+
+				var newPast = Date.now()
+				console.log("NOW: ",newPast);
+				var actual = newPast - $scope.datos[msg.chipid].past;
+				$scope.datos[msg.chipid].latency = actual;
+				$scope.datos[msg.chipid].past = newPast;
+				console.log("OBJETO DATOS: ",$scope.datos);
+				$scope.arregloDeDatos = Object.keys($scope.datos).map(i => $scope.datos[i]);
+
+				//console.log("arregloDeDatos",$scope.arregloDeDatos);
+				$scope.arregloDeDatos.sort(function(a,b){
+					return parseFloat(a.distancia)-parseFloat(b.distancia);
+				});
+
+				var nuevos = $scope.valoresDialogo.find(x => x.chipid == $scope.arregloDeDatos[0].chipid);
+
+				console.log("LOS NUEVOS VALORES DEL TUGGER SON: X: ",nuevos.x, " Y: ",nuevos.y)
+				//$scope.start = $scope.map.grid[4][77]
+				$scope.drawMowerHistory2($scope.groups, $scope.scales, [$scope.map.grid[nuevos.x][nuevos.y]]);
+
+				$scope.datos[msg.chipid].timer = $scope.createTimer(function(){
+					$scope.datos[msg.chipid].distancia = 1000;
+				},5000);
 			});
+
+			// alert("LLEGO UN MENSAJE");
+
+			//console.log("DATOS: ",$scope.arregloDeDatos)
+			//console.log("VALORES DIALOGO",$scope.valoresDialogo);
+			//console.log("ARREGLO DEMO",$scope.arregloDemo);
+			//console.log($scope.valoresDialogo);
 		});
 
-		// alert("LLEGO UN MENSAJE");
+		return false;
+	});  
 
-		console.log("DATOS: ",$scope.arregloDeDatos)
-		//console.log($scope.valoresDialogo);
-	});
 
-	return false;
-});  
+	$scope.createTimer = function(funcion, tiempo){
 
+		var timerObject = {};
+
+		timerObject.f = funcion;
+		timerObject.time = tiempo;
+
+		timerObject.onOff = true;
+
+		setTimeout(function(){
+			if(timerObject.onOff){
+				timerObject.f();
+			}
+		},timerObject.time);
+	}
 
 }]);
+
+
+
 
 tuggerTracker.directive('tuggerMap', function ($parse) {
 	var directiveDefinitionObject = {

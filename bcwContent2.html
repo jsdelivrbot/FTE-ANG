@@ -28,6 +28,7 @@
           <md-checkbox ng-model="item.done" ng-click="checkBoxClick(item.done,item)"></md-checkbox>
           <div class="md-list-item-text">
             <h2> chipid: {{ item.chipid }} </h2>
+            <h3> X: {{ item.x }} - Y: {{ item.y }}</h3>
             <div layout-gt-xs = "row" ng-show="item.modeBool" class = "ng-hide">
               <p> MINO: </p>
               <input type="text" name="mino" ng-model="item.mino">
