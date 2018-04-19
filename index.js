@@ -125,21 +125,9 @@ mqttCallback = function(topic,message)
 
 				var query = {chipid:objeto.chipid};
 
-				// dbo.collection("BeaconsInPlay").deleteOne(query,function(err,obj){
-				// 	if(err) throw err;
-				// 	console.log("BEACON ELIMINADO!");
-				// 	dbo.collection("BeaconsInPlay").insertOne(objeto,function(err,res){
-				// 		if(err)throw err;
-				// 		console.log("BEACON REGISTRADO O ACTUALIZADO!");
-				// 		db.close();
-				// 	})
-				// })
-
-				// var query = {chipid:objeto.chipid};
-
 				dbo.collection("BeaconsInPlay").find(query).toArray(function(err,result){
 					if(err) throw err;
-					console.log(result);
+					//console.log(result);
 
 
 					if(result.length<=0){
@@ -179,22 +167,12 @@ mqttCallback = function(topic,message)
 		var o;
 		try
 		{
-			// console.log(typeof(m));
-			// var str = ""+m;
-			// str = str.replace(/'/g,"\"");
-			// str = str.replace(":",":\"");
-			// str = str.replace("}","\"}");
-			// console.log(str,"primer reemplazo");
-			// o = JSON.parse(str);
-			// console.log("REGISTRO");
-			console.log(typeof(m));
+
 			var str = ""+m;
 
-			console.log("STRING ORIGINAL",str);
+			//console.log("STRING ORIGINAL",str);
 
 			str = str.replace(/'/g,"\"");
-			//str = str.replace(/:[^"]/,":\"");
-			//str = str.replace("}","\"}");
 			var correcciones = str.match(/:[^"]*.?[,}]/g,str)
 
 			correcciones.forEach(function(x){
@@ -204,9 +182,9 @@ mqttCallback = function(topic,message)
 				str = str.replace(x,__temp);
 				// console.log(x,__temp);
 			})
-			console.log("STRING CORREGIDO: ",str);
+			//console.log("STRING CORREGIDO: ",str);
 			o = JSON.parse(str);
-			console.log("REGISTRO");
+			//console.log("REGISTRO");
 		}catch(e)
 		{
 			console.log("error: pero haha lo cacche",e.toString());
@@ -224,10 +202,10 @@ mqttCallback = function(topic,message)
 		var o;
 		try
 		{
-			console.log(typeof(m));
+			//console.log(typeof(m));
 			var str = ""+m;
 
-			console.log("STRING ORIGINAL",str);
+			//console.log("STRING ORIGINAL",str);
 
 			str = str.replace(/'/g,"\"");
 			//str = str.replace(/:[^"]/,":\"");
@@ -241,9 +219,9 @@ mqttCallback = function(topic,message)
 				str = str.replace(x,__temp);
 				// console.log(x,__temp);
 			})
-			console.log("STRING CORREGIDO: ",str);
+			//console.log("STRING CORREGIDO: ",str);
 			o = JSON.parse(str);
-			console.log("REGISTRO");
+			//console.log("REGISTRO");
 		}catch(e)
 		{
 			console.log("error: pero haha lo cacche",e.toString());
@@ -255,7 +233,7 @@ mqttCallback = function(topic,message)
 			// if(parseInt(o.minLoad,16) == parseInt("CACA",16) && parseInt(o.maxLoad,16) == parseInt("BEBE",16)){
 			if(parseInt(o.minLoad,16) == 6081 && parseInt(o.maxLoad,16) == 15){
 				io.emit('updates',o);
-				console.log(o);
+				//console.log(o);
 			}
 
 		}
@@ -341,7 +319,7 @@ app.get('/demoMongo',function(req,res)
 	var cargarDatos = function(valores)
 	{
 		if(valores != undefined){
-			console.log("el resultado esta definido");
+			//console.log("el resultado esta definido");
 
 			var respuesta = "";
 
@@ -352,7 +330,7 @@ app.get('/demoMongo',function(req,res)
 			res.send(respuesta);
 		}
 		else{
-			console.log("el resultado no esta definido");
+			//console.log("el resultado no esta definido");
 		}	
 	}
 	//res.sendFile(__dirname+'/app.js');
@@ -364,13 +342,13 @@ app.get('/updateBeacon',function(req,res){
 	if(req.query.nuevosValores)
 	{
 
-		console.log("LOS VALORES RESIVIDOS EN EL GET: "+req.query.nuevosValores);
+		//console.log("LOS VALORES RESIVIDOS EN EL GET: "+req.query.nuevosValores);
 		var MongoClient = require('mongodb').MongoClient;
 
 		var url = "mongodb://127.0.0.1:27017";
 
 		var nuevosValoresObjeto = JSON.parse(req.query.nuevosValores);
-		console.log("LOS NUEVOS VALORES EN EL OBJETO SON: ",nuevosValoresObjeto);
+		//console.log("LOS NUEVOS VALORES EN EL OBJETO SON: ",nuevosValoresObjeto);
 		var viejosValores = [];
 
 		MongoClient.connect(url, function(err,db){
@@ -468,7 +446,31 @@ app.get('/updateBeacon',function(req,res){
 
 	res.send("<h1>All Good</h1>");
 	//console.log("res",res);
+});
 
+app.get('/removeBeaconMap',function(req,res){
+	if(req.query.x && req.query.y){
+		
+		var MongoClient = require('mongodb').MongoClient;
+		var url = "mongodb://127.0.0.1:27017";
+
+		MongoClient.connect(url,function(err,db){
+			if(err) throw err;
+
+			var dbo = db.db("mydb");
+
+			var myquery = {x:parseInt(req.query.x),y:parseInt(req.query.y)};
+			console.log(myquery);
+
+			var newValues = {$unset: {x:undefined,y:undefined}};
+
+			dbo.collection("BeaconsInPlay").update(myquery,newValues,function(err,res){
+				if(err) throw err;
+				console.log("BEACON ELIMINADO DEL MAPA<----------------------");
+				db.close();
+			});
+		});
+	}
 });
 
 app.get('/app.js',function(req,res)
@@ -506,24 +508,8 @@ io.on('connection',function(socket)
 		socketOn = true;
 	});
 });
-/*
-http.listen(3000,function()
-{
-	console.log('listening on *:3000');
-});*/
-
-
-
 
 http.listen(PORT,function(){console.log("INIT OK!")})
-
-
-// express()
-//   .use(express.static(path.join(__dirname, 'public')))
-//   .set('views', path.join(__dirname, 'views'))
-//   .set('view engine', 'ejs')
-//   .get('/', (req, res) => res.render('pages/index'))
-//   .listen(PORT, () => console.log(`Listening on ${ PORT }`))
 
 
 

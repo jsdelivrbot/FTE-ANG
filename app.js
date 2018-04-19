@@ -82,17 +82,28 @@ tuggerTracker.controller("myController",["$scope","$timeout","$mdDialog",functio
 			//Se crea el objeto del dialogo y se le solicita se muestre con los parametros asignados.
 		    $mdDialog.show({
 		      	//Variables locales utilizadas dentro del controlador particular del dialogo
-		      	locals:{vars: l, todos:valoresDialogo},
+		      	locals:{vars: l, todos:valoresDialogo, parentScope:$scope},
 		      	templateUrl: 'bcwContent2.html',//archivo html que va a mostrar dentro del dialogo
 				parent: angular.element(document.body),//Se le indica al dialogo cual su elemento padre, en este caso la pagina principal
 				targetEvent: ev,//se le dice cual sera el elemento de target
 				clickOutsideToClose:true,//se especifica que un click fuera del recuadro permitira que este se cierre
 				fullscreen: $scope.customFullscreen, // 
 				/*Se declara y se crea el controlador correspondiente al dialogo, aqui se asignan las variables que espera*/
-				controller: ['$scope','vars','todos',function($scope,vars,todos){
+				controller: ['$scope','vars','todos','parentScope',function($scope,vars,todos,parentScope){
 					$scope.x = vars.x;//dentro del scope del dialogo se guarda la variable x
 					$scope.y = vars.y;//dentro del scope del dialogo se guarda la variable y
 					$scope.todos = todos;//dentro del scope del dialgo se guarda la informacion de los beacons obtenida de la base de datos
+					$scope.parentScope = parentScope;
+
+
+					$scope.seleccionado = $scope.todos.find(function(item){
+						return item.x == $scope.x && item.y == $scope.y;
+					});
+
+					if($scope.seleccionado){
+						console.log("ITEM SELECCIONADO: ",$scope.seleccionado);
+						$scope.seleccionado.done = true;
+					}
 
 					/*Metodo utilizado para responder a los clicks del checkbox de la lista*/
 					$scope.checkBoxClick = function(estado,elemento){
@@ -126,11 +137,16 @@ tuggerTracker.controller("myController",["$scope","$timeout","$mdDialog",functio
 						/*Si el boton precionado fue guardar*/
 						if(seleccion){
 							/*Entonces se verificaran todos los elementos dentro de la lista para registrar los cambios en la base de datos*/
+							var toBeDeleted = false;
+
 							$scope.todos.forEach(function(item){
 								
+								toBeDeleted = toBeDeleted || item.done;
+
 								var nuevosValores = {};
 								var nuevosValoresJsonString = "";
 								nuevosValores.chipid = item.chipid;
+
 
 								console.log("VALOR DE LOS CHECKBOX: ",item.modeBool);
 
@@ -172,7 +188,45 @@ tuggerTracker.controller("myController",["$scope","$timeout","$mdDialog",functio
 								xmlHttp.open("GET","http://localhost:5000/updateBeacon?nuevosValores="+nuevosValoresJsonString,true);
 								xmlHttp.send(null);
 
-							})
+							});
+
+							if(!toBeDeleted){
+								console.log("SE VAN A ELIMINAR LAS COORDENADAS");
+								xmlHttp.open("GET","http://localhost:5000/removeBeaconMap?x="+$scope.x+"&y="+$scope.y,true);
+								xmlHttp.send(null);
+							}
+
+							console.log("$scope.datos",$scope.datos);
+							console.log("$scope.parentScope.datos",$scope.parentScope.datos)
+
+							$scope.xmlHttp = new XMLHttpRequest();
+
+							$scope.xmlHttp.open("GET","http://localhost:5000/demoMongo",false);
+
+							$scope.xmlHttp.send(null);
+
+							$scope.parentScope.arregloDemo = $scope.xmlHttp.responseText.match(/{.+?}/g);
+
+							$scope.parentScope.valoresDialogo = []
+
+							$scope.parentScope.arregloDeDatos = []
+
+							console.log("arregloDemo: ",$scope.parentScope.arregloDemo);
+
+							$scope.parentScope.arregloDemo.forEach(function(item){
+								console.log("STRING JSON: ",item,"OBJETO JSON: ",JSON.parse(item));
+								$scope.parentScope.valoresDialogo.push(JSON.parse(item));
+							});
+
+							for(var i = 0;i<$scope.parentScope.valoresDialogo.length;i++)
+							{
+								$scope.parentScope.datos[$scope.parentScope.valoresDialogo[i].chipid] = $scope.parentScope.valoresDialogo[i];
+								$scope.parentScope.datos[$scope.parentScope.valoresDialogo[i].chipid].distancia = 1000;
+								$scope.parentScope.datos[$scope.parentScope.valoresDialogo[i].chipid].latency = 0;
+								$scope.parentScope.datos[$scope.parentScope.valoresDialogo[i].chipid].past = 0;
+							}
+
+							$scope.parentScope.initEverything();
 						}
 						$mdDialog.hide();
 					}
@@ -260,7 +314,7 @@ tuggerTracker.controller("myController",["$scope","$timeout","$mdDialog",functio
 		/*map es un objeto que contiene cuatro arreglos los cuales guardan los valores 
 		de la cuadricula en general, los cuadros que son pasto, los cuadros que son piedra
 		y los cuadros que son border*/
-		var map = { grid:[], grass:[], rock:[], border:[] };
+		var map = { grid:[], grass:[], rock:[], border:[] ,beacon:[]};
 
 		/*Este for recorre todos los valores del eje x de la cuadricula uno por uno*/
 		for (x = 0; x < gridSize.x; x++) {
@@ -277,6 +331,15 @@ tuggerTracker.controller("myController",["$scope","$timeout","$mdDialog",functio
 				var border = Math.random() < ratios.border;*/
 				/*Dentro de la variable type sera igual a rock si es un borde, caso contrario sera grass*/
 				var type = $scope.isBorder(x, y, gridSize)?"border":"grass";
+
+				var beaconSquare = $scope.valoresDialogo.find(function(element){
+					return element.x == x && element.y == y;
+				});
+
+				if(beaconSquare){
+					console.log("SE HA CAMBIADO UN CUADRO A BEACON: x:",x,"y:",y);
+					type = "beacon"
+				}
 
 				/*En la variable cel, se guardara un objeto el cual tiene 3 atributos llamados x, y y type a los cuales se les asignan
 				los valores de sus respectivas variables*/
@@ -552,6 +615,7 @@ tuggerTracker.controller("myController",["$scope","$timeout","$mdDialog",functio
 		$scope.drawCells($scope.svgContainer, $scope.scales, $scope.map.grass, "grass");
 		$scope.drawCells($scope.svgContainer, $scope.scales, $scope.map.rock, "rock");
 		$scope.drawCells($scope.svgContainer, $scope.scales, $scope.map.border, "border");
+		$scope.drawCells($scope.svgContainer, $scope.scales, $scope.map.beacon, "beacon");
 
 		$scope.groups = { path:$scope.svgContainer.append("g"),
 		                position:$scope.svgContainer.append("g") };
@@ -569,30 +633,6 @@ tuggerTracker.controller("myController",["$scope","$timeout","$mdDialog",functio
 
 	$(function (){
 		var socket = io();
-		// socket.on('chat message',function(msg){
-		// 	try
-		// 	{
-		// 		var json = JSON.parse(msg);
-		// 		console.log(msg);
-		// 		var next = $scope.getNext2($scope.map,json)
-		// 		if(next !== null)
-		// 		{
-		// 			if(next.type === "grass")
-		// 			{
-		// 				start = next;
-		// 				$scope.drawMowerHistory2($scope.groups,$scope.scales,[start]);
-		// 			}
-		// 		}
-		// 		console.log("TODO OK!");
-		// 	}
-		// 	catch(e)
-		// 	{
-		// 		console.log("ERROR: ",e);
-		// 	}
-		// 	console.log("LLEGO UN MENSAJE");
-		// 	alert("LLEGO UN MENSAJE");
-		// });
-		
 
 		var socket = io();
 		socket.on('updates',function(msg){
@@ -626,19 +666,16 @@ tuggerTracker.controller("myController",["$scope","$timeout","$mdDialog",functio
 
 				console.log("LOS NUEVOS VALORES DEL TUGGER SON: X: ",nuevos.x, " Y: ",nuevos.y)
 				//$scope.start = $scope.map.grid[4][77]
-				$scope.drawMowerHistory3($scope.groups, $scope.scales, [$scope.map.grid[nuevos.x][nuevos.y]]);
+				if(nuevos.x && nuevos.y)
+				{
+					$scope.drawMowerHistory3($scope.groups, $scope.scales, [$scope.map.grid[nuevos.x][nuevos.y]]);
+				}
 
 				$scope.datos[msg.chipid].timer = $scope.createTimer(function(){
 					$scope.datos[msg.chipid].distancia = 1000;
 				},5000);
 			});
 
-			// alert("LLEGO UN MENSAJE");
-
-			//console.log("DATOS: ",$scope.arregloDeDatos)
-			//console.log("VALORES DIALOGO",$scope.valoresDialogo);
-			//console.log("ARREGLO DEMO",$scope.arregloDemo);
-			//console.log($scope.valoresDialogo);
 		});
 
 		return false;
@@ -662,9 +699,6 @@ tuggerTracker.controller("myController",["$scope","$timeout","$mdDialog",functio
 	}
 
 }]);
-
-
-
 
 tuggerTracker.directive('tuggerMap', function ($parse) {
 	var directiveDefinitionObject = {
