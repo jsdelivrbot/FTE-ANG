@@ -20,13 +20,6 @@ body {
 	stroke: green;
 }
 
-.beacon{
-	fill: blue;
-	opacity: 1;
-	stroke-width: 2px;
-	stroke: grey;
-}
-
 .control {
 	float: left;
 }

@@ -63,12 +63,6 @@ svg {
   stroke: #FF6600;
 }
 
-.beacon{
-  fill: yellow;
-  stroke-width: 1px;
-  stroke: grey;
-}
-
 .position {
   fill: #C9EBF0;
   stroke-width: 3px;
