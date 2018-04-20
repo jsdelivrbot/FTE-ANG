@@ -1,0 +1,75 @@
+
+
+<!DOCTYPE html >
+<html ng-app= "tuggerTracker">
+<head>
+	<title>Tugger Tracker Beta 2.0</title>
+
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Angular Material style sheet -->
+  	<link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/angular_material/1.1.0/angular-material.min.css">
+  	<link rel="stylesheet" type="text/css" href="style.css">
+
+</head>
+<body>
+
+	<div ng-controller="sidenavDemo2" layout="column" style="height: 500px;" ng-cloak>
+
+		<section layout="row" flex>
+
+			<md-sidenav class="md-sidenav-left" md-component-id="left"
+			            md-disable-backdrop md-whiteframe="4">
+
+				<md-toolbar class="md-theme-indigo">
+					<h1 class="md-toolbar-tools">Opciones y Herramientas</h1>
+				</md-toolbar>
+
+				<md-content layout-margin>
+					<h2>Rutas</h2>
+					<md-button ng-click="toggleLeft()" class="md-accent">
+						Cerrar
+					</md-button>
+				</md-content>
+
+			</md-sidenav>
+
+			<md-content flex layout-padding>
+
+				<div layout="row" layout-align="top center">
+
+			    	<div>
+				    	<md-button ng-click="toggleLeft()" class="md-raised">
+				        	Opciones y Herramientas
+				    	</md-button>
+				    </div>
+
+				</div>
+
+			</md-content>
+
+		</section>
+
+	</div>
+
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/4.13.0/d3.js"></script>
+	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular.min.js"></script>
+	<!-- <script src="angular.min.js"></script> -->
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.6.9/angular-aria.min.js"></script>
+	<!-- <script src="angular-aria.min.js"></script> -->
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.6.9/angular-animate.js"></script>
+	<!-- <script src="angular-animate.js"></script> -->
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/angular-messages/1.6.9/angular-messages.js"></script>
+	<!-- <script src="angular-messages.js"></script> -->
+
+	<script src="https://ajax.googleapis.com/ajax/libs/angular_material/1.1.8/angular-material.min.js"></script>
+	<!-- <script type="text/javascript" src="angular-material.min.js"></script> -->
+	<!-- <script src="d3.v3.min.js"></script> -->
+	<!-- <script type="text/javascript" src="jquery.js"></script> -->
+
+	<!-- <script type="text/javascript" src="/socket.io/socket.io.js"></script> -->
+
+
+	<script type="text/javascript" src="app.js"></script>
+	<!-- <script type="text/javascript" src="sideBar.js"></script> -->
+</body>
+</html>
