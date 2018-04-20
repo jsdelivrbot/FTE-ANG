@@ -1,20 +1,37 @@
 // MODULE
 var tuggerTracker = angular.module('tuggerTracker',['ngAria','ngMaterial']);
 
-tuggerTracker
-  .controller('sidenavDemo2', function ($scope, $timeout, $mdSidenav) {
-    $scope.toggleLeft = buildToggler('left');
+// tuggerTracker
+//   .controller('sidenavDemo2', function ($scope, $timeout, $mdSidenav) {
+//     $scope.toggleLeft = buildToggler('left');
+//     $scope.toggleRight = buildToggler('right');
+
+//     function buildToggler(componentId) {
+//       return function() {
+//         $mdSidenav(componentId).toggle();
+//       };
+//     }
+//   });
+
+
+tuggerTracker.controller("myController",["$scope","$timeout","$mdDialog","$mdSidenav",function($scope,$timeout,$mdDialog,$mdSidenav){
+// tuggerTracker.controller("myController",["$scope","$timeout","$mdDialog",function($scope,$timeout,$mdDialog){
+
+
+	$scope.toggleLeft = buildToggler('left');
     $scope.toggleRight = buildToggler('right');
+    $scope.listaRutas = false;
 
     function buildToggler(componentId) {
       return function() {
         $mdSidenav(componentId).toggle();
       };
     }
-  });
 
-
-tuggerTracker.controller("myController",["$scope","$timeout","$mdDialog",function($scope,$timeout,$mdDialog){
+    $scope.showRutas = function(){
+    	$scope.listaRutas = !$scope.listaRutas;
+    	console.log("listaRutas vale: ",$scope.listaRutas);
+    }
 
 
 	$scope.datos = {};
@@ -22,21 +39,15 @@ tuggerTracker.controller("myController",["$scope","$timeout","$mdDialog",functio
 	$scope.xmlHttp = new XMLHttpRequest();
 
 	$scope.xmlHttp.open("GET","http://localhost:5000/demoMongo",false);
-
 	$scope.xmlHttp.send(null);
-
 	console.log($scope.xmlHttp.responseText);
-
 	$scope.arregloDemo = $scope.xmlHttp.responseText.match(/{.+?}/g);
-
 	$scope.valoresDialogo = []
-
 	$scope.arregloDeDatos = []
-
 	console.log("arregloDemo: ",$scope.arregloDemo);
 
 	$scope.arregloDemo.forEach(function(item){
-		console.log("STRING JSON: ",item,"OBJETO JSON: ",JSON.parse(item));
+		//console.log("STRING JSON: ",item,"OBJETO JSON: ",JSON.parse(item));
 		$scope.valoresDialogo.push(JSON.parse(item));
 	});
 
@@ -53,6 +64,84 @@ tuggerTracker.controller("myController",["$scope","$timeout","$mdDialog",functio
 
 	console.log("$scope.datos",$scope.datos);
 
+	$scope.xmlHttp.open("GET","http://localhost:5000/getRutas",false);
+	$scope.xmlHttp.send(null);
+	$scope.rutas = [];
+	$scope.rutaSeleccionada;
+	$scope.beaconsDeRutaSeleccionada = [];
+
+	$scope.cambioDeRuta = function(){
+
+		var rutaSelect = $scope.rutas.find(function(ruta){
+			return ruta.nombre == $scope.rutaSeleccionada.nombre;
+		});
+
+		$scope.beaconsDeRutaSeleccionada = rutaSelect.beaconsObjects;
+
+	}
+
+	$scope.rutaMouseOver = function(beacon){
+
+		console.log(beacon);
+		console.log("mouse over: "+beacon.chipid);
+
+		// beacon.cssClass = d3.select('rect[id="x'+beacon.x+'y'+beacon.y+'"]').attr("class");
+		d3.select('rect[id="x'+beacon.x+'y'+beacon.y+'"]').attr("class","beaconPointed");
+		
+	}
+
+	$scope.rutaMouseLeave = function(beacon){
+		console.log("mouse leave: "+beacon.chipid,"returns to: ",beacon.cssClass);
+		d3.select('rect[id="x'+beacon.x+'y'+beacon.y+'"]').attr("class","beacon");
+	}
+
+	$scope.rutasStrings = $scope.xmlHttp.responseText.split(/JS/g);
+
+	$scope.rutasStrings.forEach(function(item){
+		$scope.rutas.push(JSON.parse(item));
+	});
+
+
+	$scope.eliminarBeacon = function(beacon){
+
+		d3.select('rect[id="x'+beacon.x+'y'+beacon.y+'"]').attr("class","beacon");
+
+		var rutaModificar = $scope.rutas.find(function(i){
+			return i.nombre == $scope.rutaSeleccionada.nombre;
+		});
+
+		var indexBeacon = rutaModificar.beaconsObjects.findIndex(function(item){
+			return item.chipid == beacon.chipid;
+		});
+
+		rutaModificar.beaconsObjects.splice(indexBeacon,1);
+		rutaModificar.beacons.splice(indexBeacon,1);
+
+	}
+
+	$scope.beaconNuevoNodo;
+
+	$scope.addBeaconToRoute = function(){
+
+		console.log("SE AGREGARA BEACON A LA RUTA: ",$scope.rutaSeleccionada);
+
+		$scope.rutaSeleccionada.beacons.push($scope.beaconNuevoNodo.chipid);
+
+		$scope.rutaSeleccionada.beaconsObjects.push($scope.beaconNuevoNodo);
+
+	}
+
+	$scope.guardarRutas = function(){
+
+		//$scope.rutas;
+		console.log("SE VAN A GUARDAR LAS RUTAS");
+
+		console.log($scope.rutaSeleccionada);
+
+		$scope.xmlHttp.open("GET","http://localhost:5000/updateRutas?nuevosValores="+JSON.stringify($scope.rutaSeleccionada),true);
+		$scope.xmlHttp.send(null);
+		$scope.toggleLeft();
+	}
 
 	/*Esta funcion se encarga de crear el dialogo de configuración con el cual se cambian los parametros de cada uno
 	de los smart beacons.*/
@@ -213,33 +302,42 @@ tuggerTracker.controller("myController",["$scope","$timeout","$mdDialog",functio
 							console.log("$scope.parentScope.datos",$scope.parentScope.datos)
 
 							$scope.xmlHttp = new XMLHttpRequest();
+							
+							var something = function(){
 
-							$scope.xmlHttp.open("GET","http://localhost:5000/demoMongo",false);
+								$scope.parentScope.arregloDemo = $scope.xmlHttp.responseText.match(/{.+?}/g);
+
+								$scope.parentScope.valoresDialogo = []
+
+								$scope.parentScope.arregloDeDatos = []
+
+								console.log("arregloDemo: ",$scope.parentScope.arregloDemo);
+
+								$scope.parentScope.arregloDemo.forEach(function(item){
+									console.log("STRING JSON: ",item,"OBJETO JSON: ",JSON.parse(item));
+									$scope.parentScope.valoresDialogo.push(JSON.parse(item));
+								});
+
+								for(var i = 0;i<$scope.parentScope.valoresDialogo.length;i++)
+								{
+									$scope.parentScope.datos[$scope.parentScope.valoresDialogo[i].chipid] = $scope.parentScope.valoresDialogo[i];
+									$scope.parentScope.datos[$scope.parentScope.valoresDialogo[i].chipid].distancia = 1000;
+									$scope.parentScope.datos[$scope.parentScope.valoresDialogo[i].chipid].latency = 0;
+									$scope.parentScope.datos[$scope.parentScope.valoresDialogo[i].chipid].past = 0;
+								}
+
+								$scope.parentScope.initEverything();
+								
+							}
+
+							$scope.xmlHttp.onreadystatechange = something;
+
+							$scope.xmlHttp.open("GET","http://localhost:5000/demoMongo",true);
 
 							$scope.xmlHttp.send(null);
 
-							$scope.parentScope.arregloDemo = $scope.xmlHttp.responseText.match(/{.+?}/g);
 
-							$scope.parentScope.valoresDialogo = []
 
-							$scope.parentScope.arregloDeDatos = []
-
-							console.log("arregloDemo: ",$scope.parentScope.arregloDemo);
-
-							$scope.parentScope.arregloDemo.forEach(function(item){
-								console.log("STRING JSON: ",item,"OBJETO JSON: ",JSON.parse(item));
-								$scope.parentScope.valoresDialogo.push(JSON.parse(item));
-							});
-
-							for(var i = 0;i<$scope.parentScope.valoresDialogo.length;i++)
-							{
-								$scope.parentScope.datos[$scope.parentScope.valoresDialogo[i].chipid] = $scope.parentScope.valoresDialogo[i];
-								$scope.parentScope.datos[$scope.parentScope.valoresDialogo[i].chipid].distancia = 1000;
-								$scope.parentScope.datos[$scope.parentScope.valoresDialogo[i].chipid].latency = 0;
-								$scope.parentScope.datos[$scope.parentScope.valoresDialogo[i].chipid].past = 0;
-							}
-
-							$scope.parentScope.initEverything();
 						}
 						$mdDialog.hide();
 					}
@@ -469,6 +567,7 @@ tuggerTracker.controller("myController",["$scope","$timeout","$mdDialog",functio
 		         	.attr("width", function (d) { return $scope.squareLength; })
 		         	.attr("height", function (d) { return $scope.squareLength; })
 		         	.attr("class", cssClass)
+		         	.attr("id",function(d){return "x"+d.x+"y"+d.y})
 		         	// .on("click",function(){console.log("click",this);})
 		         	.on("click",function(d) { 
 
@@ -599,12 +698,12 @@ tuggerTracker.controller("myController",["$scope","$timeout","$mdDialog",functio
 
 		$scope.svgSize = $scope.getSvgSize($scope.gridSize, $scope.squareLength);
 
-		d3.select("svg").remove()
+		d3.selectAll("svg").remove()
 
 		$scope.svgContainer = d3.select(".display")
-		                          .append("svg")
-		                          .attr("width", $scope.svgSize.width)
-		                          .attr("height", $scope.svgSize.height);
+	                        	.append("svg")
+	                        	.attr("width", $scope.svgSize.width)
+	                        	.attr("height", $scope.svgSize.height);
 	
 		$scope.scales = $scope.getScale($scope.gridSize, $scope.svgSize);
 

@@ -13,23 +13,79 @@
 </head>
 <body>
 
-	<div ng-controller="sidenavDemo2" layout="column" style="height: 50px;" ng-cloak>
+	<div ng-Controller = "myController">
+	
+		<h1>Tugger Tracker</h1>
 
 		<section layout="row" flex>
 
 			<md-sidenav class="md-sidenav-left" md-component-id="left"
 			            md-disable-backdrop md-whiteframe="4">
+				
 
 				<md-toolbar class="md-theme-indigo">
-					<h1 class="md-toolbar-tools">Disabled Backdrop</h1>
+					<h1 class="md-toolbar-tools">Opciones y Herramientas</h1>
 				</md-toolbar>
 
 				<md-content layout-margin>
-					<p>
-						This sidenav is not showing any backdrop, where users can click on it, to close the sidenav.
-					</p>
+					<md-button ng-click = "showRutas()" class = "md-accent">
+						Rutas
+					</md-button>
+
+					<md-list ng-show = "listaRutas">
+						<!-- <md-list-item class="md-2-line" ng-repeat="item in rutas"> -->
+
+							<!-- <md-checkbox></md-checkbox> -->
+
+							<!-- <div class="md-list-item-text"> -->
+								<md-input-container>
+									<label>Ruta</label>
+									<md-select ng-model="rutaSeleccionada" ng-change = "cambioDeRuta()">
+										<md-option><em>None</em></md-option>
+
+										<md-option ng-repeat="item in rutas" ng-value = "item">
+											{{ item.nombre }}
+										</md-option>
+									</md-select>
+
+									<md-icon md-svg-src = "image/ic_add_circle_outline_black_24px.svg"></md-icon>
+
+								</md-input-container>
+								
+								<md-list-item class = "md-1-line" ng-repeat = "beacon in beaconsDeRutaSeleccionada">
+									<md-icon md-svg-src="image/delete.svg" ng-click = "eliminarBeacon(beacon)" ng-mouseover = "rutaMouseOver(beacon)" ng-mouseleave = "rutaMouseLeave(beacon)"></md-icon>
+									<p ng-mouseover = "rutaMouseOver(beacon)" ng-mouseleave = "rutaMouseLeave(beacon)"> {{ beacon.chipid }} </p>
+									<md-divider md-inset=""></md-divider>
+								</md-list-item>	
+
+								<md-list-item class = "md-1-line">
+									<md-icon md-svg-src = "image/ic_add_circle_outline_black_24px.svg" class = "addIcon" ng-click = "addBeaconToRoute()"></md-icon>
+
+									<md-select ng-model = "beaconNuevoNodo">
+										<md-option><em>None</em></md-option>
+
+										<md-option ng-repeat="item in valoresDialogo" ng-value = "item" ng-mouseover = "rutaMouseOver(item)" ng-mouseleave = "rutaMouseLeave(item)">
+											{{ item.chipid }}
+										</md-option>
+									</md-select>
+								</md-list-item>
+
+							<!-- </div> -->
+						<!-- </md-list-item> -->
+					</md-list>
+
+
+					<div layout-gt-xs = "row">
+						<md-button ng-show = "listaRutas" class = "md-accent" ng-click = "guardarRutas()">
+							Guardar
+						</md-button>
+						<md-button ng-show = "listaRutas" ng-click = "toggleLeft()" class = "md-accent">
+							Cancelar
+						</md-button>
+					</div>
+
 					<md-button ng-click="toggleLeft()" class="md-accent">
-						Close this Sidenav
+						Cerrar
 					</md-button>
 				</md-content>
 
@@ -37,34 +93,19 @@
 
 			<md-content flex layout-padding>
 
-				<div layout="column" layout-align="top center">
-				    <p>
-				    	Developers can also disable the backdrop of the sidenav.<br/>
-				    	This will disable the functionality to click outside to close the sidenav.
-				    </p>
+				<div layout="row" layout-align="top center">
 
-			    <div>
-			    	<md-button ng-click="toggleLeft()" class="md-raised">
-			        	Toggle Sidenav
-			    	</md-button>
-			    </div>
+			    	<div>
+				    	<md-button ng-click="toggleLeft()" class="md-raised">
+				        	Opciones y Herramientas
+				    	</md-button>
+				    </div>
 
-			  </div>
+				</div>
 
 			</md-content>
 
 		</section>
-
-	</div>
-
-
-	<div ng-Controller = "myController">
-		
-		<div>	
-			<h1>Tugger Tracker</h1>
-			<button>Registrar Ruta</button>
-		</div>
-
 
 		<div class="display"></div>
 		<tugger-map></tugger-map>

@@ -1,51 +1,9 @@
 
 
-var objetoCualquiera1 = {};
-
-objetoCualquiera1.id = 0;
-objetoCualquiera1.x = 10;
-objetoCualquiera1.y = 20;
-objetoCualquiera1.nombre = "pepe";
-objetoCualquiera1.kah = "kah!";
-var objetoCualquiera2 = {};
-
-objetoCualquiera2.id = 2;
-objetoCualquiera2.x = 10;
-objetoCualquiera2.y = 20;
-objetoCualquiera2.nombre = "pica";
-objetoCualquiera2.kah = "kah!";
-
-var objetoCualquiera3 = {};
-
-objetoCualquiera3.id = 3;
-objetoCualquiera3.x = 10;
-objetoCualquiera3.y = 20;
-objetoCualquiera3.nombre = "papas";
-objetoCualquiera3.kah = "kah!";
-
-var objetoCualquiera4 = {};
-
-objetoCualquiera4.id = 4;
-objetoCualquiera4.x = 10;
-objetoCualquiera4.y = 20;
-objetoCualquiera4.nombre = "con";
-objetoCualquiera4.kah = "kah!";
+// var jsonStrings = '{"_id":"5ad68149809f17395b9372bb","chipid":"4371333","mode":"scanner","marj":"0x4321","mino":"0x4321"}{"_id":"5ad68160809f17395b9372bc","chipid":"8909311","mode":"scanner","marj":"0890","mino":"9311"}{"_id":"5ad68225809f17395b9372bd","chipid":"4429871","mode":"scanner","marj":"0442","mino":"9871"}{"_id":"5ad68239809f17395b9372be","chipid":"4440430","mode":"scanner","marj":"0444","mino":"0431"}{"_id":"5ad6829a809f17395b9372bf","chipid":"8909802","mode":"scanner","marj":"0890","mino":"9802"}{"_id":"5ad682a9809f17395b9372c0","chipid":"1387646","mode":"scanner","marj":"0138","mino":"7646"}{"_id":"5ad682d5809f17395b9372c1","chipid":"4427747","mode":"scanner","marj":"0442","mino":"7747"}{"_id":"5ad682ea809f17395b9372c2","chipid":"4440442","mode":"scanner","marj":"BEBE","mino":"CACA"}JS{"_id":"5ad68149809f17395b9372bb","chipid":"4371333","mode":"scanner","marj":"0x4321","mino":"0x4321"}{"_id":"5ad68160809f17395b9372bc","chipid":"8909311","mode":"scanner","marj":"0890","mino":"9311"}{"_id":"5ad68225809f17395b9372bd","chipid":"4429871","mode":"scanner","marj":"0442","mino":"9871"}{"_id":"5ad68239809f17395b9372be","chipid":"4440430","mode":"scanner","marj":"0444","mino":"0431"}{"_id":"5ad6829a809f17395b9372bf","chipid":"8909802","mode":"scanner","marj":"0890","mino":"9802"}{"_id":"5ad682a9809f17395b9372c0","chipid":"1387646","mode":"scanner","marj":"0138","mino":"7646"}{"_id":"5ad682d5809f17395b9372c1","chipid":"4427747","mode":"scanner","marj":"0442","mino":"7747"}{"_id":"5ad682ea809f17395b9372c2","chipid":"4440442","mode":"scanner","marj":"BEBE","mino":"CACA"}JS{"_id":"5ad68149809f17395b9372bb","chipid":"4371333","mode":"scanner","marj":"0x4321","mino":"0x4321"}{"_id":"5ad68160809f17395b9372bc","chipid":"8909311","mode":"scanner","marj":"0890","mino":"9311"}{"_id":"5ad68225809f17395b9372bd","chipid":"4429871","mode":"scanner","marj":"0442","mino":"9871"}{"_id":"5ad68239809f17395b9372be","chipid":"4440430","mode":"scanner","marj":"0444","mino":"0431"}{"_id":"5ad6829a809f17395b9372bf","chipid":"8909802","mode":"scanner","marj":"0890","mino":"9802"}{"_id":"5ad682a9809f17395b9372c0","chipid":"1387646","mode":"scanner","marj":"0138","mino":"7646"}{"_id":"5ad682d5809f17395b9372c1","chipid":"4427747","mode":"scanner","marj":"0442","mino":"7747"}{"_id":"5ad682ea809f17395b9372c2","chipid":"4440442","mode":"scanner","marj":"BEBE","mino":"CACA"}'
+var jsonStrings = '{"_id":"5ad68149809f17395b9372bb","chipid":"4371333","mode":"scanner","marj":"0x4321","mino":"0x4321"}{"_id":"5ad68160809f17395b9372bc","chipid":"8909311","mode":"scanner","marj":"0890","mino":"9311"}{"_id":"5ad68225809f17395b9372bd","chipid":"4429871","mode":"scanner","marj":"0442","mino":"9871"}{"_id":"5ad68239809f17395b9372be","chipid":"4440430","mode":"scanner","marj":"0444","mino":"0431"}{"_id":"5ad6829a809f17395b9372bf","chipid":"8909802","mode":"scanner","marj":"0890","mino":"9802"}{"_id":"5ad682a9809f17395b9372c0","chipid":"1387646","mode":"scanner","marj":"0138","mino":"7646"}{"_id":"5ad682d5809f17395b9372c1","chipid":"4427747","mode":"scanner","marj":"0442","mino":"7747"}{"_id":"5ad682ea809f17395b9372c2","chipid":"4440442","mode":"scanner","marj":"BEBE","mino":"CACA"}'
 
 
-var llaves = Object.keys(objetoCualquiera1);
+var arregloStrings = jsonStrings.split(/JS/g);
 
-
-var arregloCualquiera = [objetoCualquiera1,objetoCualquiera2,objetoCualquiera3,objetoCualquiera4];
-
-var index = arregloCualquiera.find(x => x.id == '3');
-
-console.log(index);
-
-// console.log(typeof(llaves));
-
-
-// llaves.forEach(function(item){
-// 	console.log(typeof(item),item);
-// })
-
-
+console.log(arregloStrings);

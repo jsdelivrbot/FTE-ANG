@@ -309,7 +309,7 @@ app.get('/demoMongo',function(req,res)
 				throw err;
 			}
 
-			console.log(result);
+			//console.log(result);
 			cargarDatos(result);
 			db.close();
 		});
@@ -336,6 +336,85 @@ app.get('/demoMongo',function(req,res)
 	//res.sendFile(__dirname+'/app.js');
 });
 
+app.get('/getRutas',function(req,res)
+{
+
+	var MongoClient = require('mongodb').MongoClient;
+	var url = 'mongodb://localhost:27017/';
+
+	MongoClient.connect(url,function(err,db){
+		if(err){
+			console.log("error en conexion");
+			throw err;
+		}
+
+		var resultado = [];
+
+		var dbo = db.db("mydb");
+		dbo.collection("RutasTugger").find({}).toArray(function(err,result){
+			if(err){
+				console.log("error en query");
+				throw err;
+			}
+
+			resultado = result;
+
+			resultado.forEach(function(x,idx,arrayX){
+
+				x.beaconsObjects = [];
+				x.beacons.forEach(function(y,idy,arrayY){
+
+					var query = {chipid:""+y};
+					//console.log("busqueda de beacon para ruta: ",query);
+
+					dbo.collection("BeaconsInPlay").find({chipid:""+y}).toArray(function(err,result){
+						if (err) throw err;
+
+						//console.log("RESULTADO DE LA BUSQUEDA DE",query," : ",result);
+
+						if(result){
+							if(result.length>0){
+								//console.log("se va a agregar: ",result[0],"al arreglo");
+								x.beaconsObjects.push(result[0]);
+							}
+						}
+
+						if(idx === arrayX.length - 1 && idy === arrayY.length - 1){
+							console.log("resultado***********************",resultado);
+							cargarDatos(resultado);
+							db.close();
+						}
+
+					});
+				});
+			});
+		});
+	})
+
+
+	var cargarDatos = function(valores)
+	{
+		if(valores != undefined){
+			//console.log("el resultado esta definido");
+
+			var respuesta = "";
+
+			valores.forEach(function(item,idx,array){
+				console.log("idx",idx);
+				respuesta += JSON.stringify(item);
+				if(!(idx === array.length - 1) && array.length>1){
+					respuesta += "JS";
+				}
+			})
+
+			res.send(respuesta);
+		}
+		else{
+			//console.log("el resultado no esta definido");
+		}	
+	}
+	//res.sendFile(__dirname+'/app.js');
+});
 
 app.get('/updateBeacon',function(req,res){
 
@@ -446,6 +525,43 @@ app.get('/updateBeacon',function(req,res){
 
 	res.send("<h1>All Good</h1>");
 	//console.log("res",res);
+});
+
+app.get('/updateRutas',function(req,res){
+
+	if(req.query.nuevosValores){
+
+		var nuevosValores = JSON.parse(req.query.nuevosValores);
+
+		console.log("VALORES RECIBIDOS PARA NUEVAS RUTAS: ",nuevosValores);
+
+		var MongoClient = require("mongodb").MongoClient;
+
+		var url = "mongodb://127.0.0.1:27017";
+
+		MongoClient.connect(url,function(err,db){
+
+			if(err) throw err;
+
+			var dbo = db.db("mydb");
+
+			var myquery = {nombre:nuevosValores.nombre};
+
+			var _tempValores = {}
+			_tempValores.beacons = nuevosValores.beacons;
+
+
+			var newValues = {$set:_tempValores};
+
+
+			dbo.collection("RutasTugger").update(myquery,newValues,function(err,res){
+				if(err) throw err;
+				console.log("Ruta actualizada");
+				db.close();
+			});
+		});
+	}
+
 });
 
 app.get('/removeBeaconMap',function(req,res){

@@ -31,6 +31,13 @@ body {
 	stroke: grey;
 }
 
+.beaconPointed{
+	fill: blue;
+	opacity: 1;
+	stroke-width: 3px;
+	stroke: red;
+}
+
 .control {
 	float: left;
 }
