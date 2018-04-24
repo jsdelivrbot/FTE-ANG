@@ -40,6 +40,9 @@
 							<!-- <div class="md-list-item-text"> -->
 								<md-input-container>
 									<label>Ruta</label>
+
+									<md-icon md-svg-src="image/delete.svg" ng-click = "eliminarRuta()"></md-icon>
+
 									<md-select ng-model="rutaSeleccionada" ng-change = "cambioDeRuta()">
 										<md-option><em>None</em></md-option>
 
@@ -48,7 +51,7 @@
 										</md-option>
 									</md-select>
 
-									<md-icon md-svg-src = "image/ic_add_circle_outline_black_24px.svg"></md-icon>
+									<md-icon md-svg-src = "image/ic_add_circle_outline_black_24px.svg" ng-click = "addRuta()"></md-icon>
 
 								</md-input-container>
 								

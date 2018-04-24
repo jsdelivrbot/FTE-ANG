@@ -5,7 +5,8 @@ const PORT = process.env.PORT || 5000
 var app = require('express')();
 var http = require('http').Server(app);
 var mqtt = require('mqtt');
-
+var MongoClient = require('mongodb').MongoClient;
+var url = 'mongodb://localhost:27017';
 
 var comandosPendientes = [];
 
@@ -39,6 +40,7 @@ var options = {
 console.log("INTENTANDO CONECTAR");
 //var client = mqtt.connect('http://m14.cloudmqtt.com',options);
 var client = mqtt.connect('http://10.42.0.1');
+// var client = mqtt.connect('http://127.0.0.1');
 //console.log(client);
 
 var io = require('socket.io')(http);
@@ -73,13 +75,6 @@ client.on('connect',function(){
 
 mqttCallback = function(topic,message)
 {
-
-	var MongoClient = require('mongodb').MongoClient;
-
-	//var url = 'mongodb+srv://b08walls:53285329@cluster0-oo4wz.mongodb.net/test'
-
-	var url = 'mongodb://localhost:27017/';
-
 	var registroNode = function(m)
 	{
 		var registerBeacon = function(chipid, mode, x, y, marj, mino)
@@ -232,6 +227,22 @@ mqttCallback = function(topic,message)
 
 			// if(parseInt(o.minLoad,16) == parseInt("CACA",16) && parseInt(o.maxLoad,16) == parseInt("BEBE",16)){
 			if(parseInt(o.minLoad,16) == 6081 && parseInt(o.maxLoad,16) == 15){
+
+				MongoClient.connect(url, function(err, db){
+					if (err) throw err;
+
+					var dbo = db.db("mydb");
+
+					var query = {chipid:o.chipid};
+
+					dbo.collection("RutasTugger").find({}).toArray(function(err,result){
+						if(err) throw err;
+
+						db.close();
+					});
+				});
+
+
 				io.emit('updates',o);
 				//console.log(o);
 			}
@@ -293,8 +304,8 @@ app.get('/script.js',function(req,res)
 app.get('/demoMongo',function(req,res)
 {
 
-	var MongoClient = require('mongodb').MongoClient;
-	var url = 'mongodb://localhost:27017/';
+	
+	
 
 	MongoClient.connect(url,function(err,db){
 		if(err){
@@ -336,95 +347,127 @@ app.get('/demoMongo',function(req,res)
 	//res.sendFile(__dirname+'/app.js');
 });
 
-app.get('/getRutas',function(req,res)
-{
+app.get('/getRutas',function(req,res){
 
-	var MongoClient = require('mongodb').MongoClient;
-	var url = 'mongodb://localhost:27017/';
-
-	MongoClient.connect(url,function(err,db){
-		if(err){
-			console.log("error en conexion");
-			throw err;
-		}
-
-		var resultado = [];
-
-		var dbo = db.db("mydb");
-		dbo.collection("RutasTugger").find({}).toArray(function(err,result){
-			if(err){
-				console.log("error en query");
-				throw err;
-			}
-
-			resultado = result;
-
-			resultado.forEach(function(x,idx,arrayX){
-
-				x.beaconsObjects = [];
-				x.beacons.forEach(function(y,idy,arrayY){
-
-					var query = {chipid:""+y};
-					//console.log("busqueda de beacon para ruta: ",query);
-
-					dbo.collection("BeaconsInPlay").find({chipid:""+y}).toArray(function(err,result){
-						if (err) throw err;
-
-						//console.log("RESULTADO DE LA BUSQUEDA DE",query," : ",result);
-
-						if(result){
-							if(result.length>0){
-								//console.log("se va a agregar: ",result[0],"al arreglo");
-								x.beaconsObjects.push(result[0]);
-							}
-						}
-
-						if(idx === arrayX.length - 1 && idy === arrayY.length - 1){
-							console.log("resultado***********************",resultado);
-							cargarDatos(resultado);
-							db.close();
-						}
-
-					});
-				});
-			});
-		});
-	})
-
+	var respuesta = [];
 
 	var cargarDatos = function(valores)
 	{
 		if(valores != undefined){
 			//console.log("el resultado esta definido");
 
-			var respuesta = "";
+			var respuestaString = "";
 
 			valores.forEach(function(item,idx,array){
 				console.log("idx",idx);
-				respuesta += JSON.stringify(item);
+				respuestaString += JSON.stringify(item);
 				if(!(idx === array.length - 1) && array.length>1){
-					respuesta += "JS";
+					respuestaString += "JS";
 				}
 			})
 
-			res.send(respuesta);
+			res.send(respuestaString);
+			console.log("se ha enviado la respuesta",respuestaString);
+
 		}
 		else{
-			//console.log("el resultado no esta definido");
+			console.log("el resultado no esta definido");
 		}	
 	}
-	//res.sendFile(__dirname+'/app.js');
-});
+
+	MongoClient.connect(url,function(err,db){
+
+		var dbo = db.db("mydb");
+
+		var beaconsInPlay = dbo.collection("BeaconsInPlay");
+		var rutasTugger = dbo.collection("RutasTugger");
+
+		rutasTugger.find({}).toArray(function(err,res){
+			if( err) throw err;
+
+			console.log("RESULTADO DE BUSCAR RUTAS",res);
+
+			var visitaRuta = function(arregloRutas,indexRutas){
+
+				var nuevoObjetoRuta = arregloRutas[indexRutas];
+
+				nuevoObjetoRuta.objetosBeacon = [];
+				console.log("LA RUTA A EVALUAR",nuevoObjetoRuta);
+
+				var leerBeacons = function(arregloBeacons, indexBeacons){
+
+					var nuevoBeacon = {};
+
+					var query = {chipid:arregloBeacons[indexBeacons]};
+
+					console.log("EL QUERY A USAR PARA EL BEACON: ",query);
+
+					beaconsInPlay.find(query).toArray(function(err,res){
+						if(err) throw err;
+
+						console.log("EL RESULTADO DEL QUERY ANTERIOR FUE: ",res);
+
+						if(res){
+							if(res.length>0){
+								nuevoBeacon = res[0];
+								nuevoObjetoRuta.objetosBeacon.push(nuevoBeacon);
+
+								//console.log("ahora la nueva ruta contiene: ",nuevoObjetoRuta);
+
+								if(indexBeacons+1<arregloBeacons.length){
+									console.log("SE ESTA LEYENDO EL BEACON",indexBeacons,"DE LA RUTA",indexRutas);
+									leerBeacons(arregloBeacons,indexBeacons+1);
+								}
+								else{
+
+									console.log("se han leido todos los beacons")
+									console.log("SE HA AGREGADO EN RESPUESTA",nuevoObjetoRuta);
+									respuesta.push(nuevoObjetoRuta);
+									if(indexRutas+1<arregloRutas.length){
+										visitaRuta(arregloRutas,indexRutas+1);
+									}
+									else{
+										console.log("se han leido todas las rutas");
+										db.close();
+										cargarDatos(respuesta);
+									}
+								}
+							}//el arreglo resultante tiene al menos un elemento
+						}//el resultado existe
+
+					});//termina callback de busqueda de un beacon
+
+				}//termina leerBeacons
+
+				if(nuevoObjetoRuta.beacons.length>0){
+					leerBeacons(nuevoObjetoRuta.beacons,0);
+				}
+				else{
+					console.log("se han leido todos los beacons")
+					console.log("SE HA AGREGADO EN RESPUESTA",nuevoObjetoRuta);
+					respuesta.push(nuevoObjetoRuta);
+					if(indexRutas+1<arregloRutas.length){
+						visitaRuta(arregloRutas,indexRutas+1);
+					}
+					else{
+						console.log("se han leido todas las rutas");
+						db.close();
+						cargarDatos(respuesta);
+					}
+				}
+			}//termina visitaRuta
+
+			visitaRuta(res,0);//se visita la primera ruta
+		});//termina callback de la busqueda de rutas
+
+	});//TERMINA LA FUNCION CALLBACK DE LA CONECCION;
+
+});//TERMINA LA FUNCION app.get('/getRutas'....)
 
 app.get('/updateBeacon',function(req,res){
 
 	if(req.query.nuevosValores)
 	{
-
-		//console.log("LOS VALORES RESIVIDOS EN EL GET: "+req.query.nuevosValores);
-		var MongoClient = require('mongodb').MongoClient;
-
-		var url = "mongodb://127.0.0.1:27017";
 
 		var nuevosValoresObjeto = JSON.parse(req.query.nuevosValores);
 		//console.log("LOS NUEVOS VALORES EN EL OBJETO SON: ",nuevosValoresObjeto);
@@ -537,8 +580,6 @@ app.get('/updateRutas',function(req,res){
 
 		var MongoClient = require("mongodb").MongoClient;
 
-		var url = "mongodb://127.0.0.1:27017";
-
 		MongoClient.connect(url,function(err,db){
 
 			if(err) throw err;
@@ -564,12 +605,57 @@ app.get('/updateRutas',function(req,res){
 
 });
 
+app.get('/addRuta',function(req,res){
+
+	if(req.query.nuevaRuta){
+		MongoClient.connect(url,function(err,db){
+
+			var dbo = db.db("mydb");
+
+			var rutasTugger = dbo.collection("RutasTugger");
+
+			console.log("NUEVA RUTA RECIBIDA EN GET",req.query.nuevaRuta);
+
+			var nuevaRuta = JSON.parse(req.query.nuevaRuta);
+
+			delete nuevaRuta.objetosBeacon;
+
+			rutasTugger.insertOne(nuevaRuta,function(err,result){
+				if(err) throw err;
+
+				console.log("NUEVA RUTA INSERTADA",nuevaRuta);
+				res.send("ok");
+			})
+
+
+		})
+	}
+
+})
+
+app.get('/deleteRuta',function(req,res){
+	if(req.query.nombre){
+		MongoClient.connect(url,function(err,db){
+			if (err) throw err;
+
+			var dbo = db.db("mydb");
+			var rutasTugger = dbo.collection("RutasTugger");
+
+			var query = {nombre:req.query.nombre};
+
+			rutasTugger.remove(query,function(err,result){
+				if(err) throw err;
+
+				console.log("RUTA ELIMINADA: ",req.query.nombre);
+				res.send("ok");
+			})
+		});
+	}
+});
+
 app.get('/removeBeaconMap',function(req,res){
 	if(req.query.x && req.query.y){
 		
-		var MongoClient = require('mongodb').MongoClient;
-		var url = "mongodb://127.0.0.1:27017";
-
 		MongoClient.connect(url,function(err,db){
 			if(err) throw err;
 

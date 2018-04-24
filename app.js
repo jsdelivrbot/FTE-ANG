@@ -64,11 +64,26 @@ tuggerTracker.controller("myController",["$scope","$timeout","$mdDialog","$mdSid
 
 	console.log("$scope.datos",$scope.datos);
 
-	$scope.xmlHttp.open("GET","http://localhost:5000/getRutas",false);
-	$scope.xmlHttp.send(null);
 	$scope.rutas = [];
 	$scope.rutaSeleccionada;
+	$scope.nuevaRuta = {};
 	$scope.beaconsDeRutaSeleccionada = [];
+
+	$scope.cargarRutas = function(){
+		$scope.xmlHttp.open("GET","http://localhost:5000/getRutas",false);
+		$scope.xmlHttp.send(null);
+		console.log("RUTAS RESPUESTA:",$scope.xmlHttp.responseText);
+		$scope.rutasStrings = $scope.xmlHttp.responseText.split(/JS/g);
+
+		$scope.rutas = [];
+
+		$scope.rutasStrings.forEach(function(item){
+			console.log(item);
+			$scope.rutas.push(JSON.parse(item));
+		});
+	}
+
+	$scope.cargarRutas()
 
 	$scope.cambioDeRuta = function(){
 
@@ -76,8 +91,135 @@ tuggerTracker.controller("myController",["$scope","$timeout","$mdDialog","$mdSid
 			return ruta.nombre == $scope.rutaSeleccionada.nombre;
 		});
 
-		$scope.beaconsDeRutaSeleccionada = rutaSelect.beaconsObjects;
+		if(rutaSelect){
+			$scope.beaconsDeRutaSeleccionada = rutaSelect.objetosBeacon;
+		}
+		else{
+			$scope.beaconsDeRutaSeleccionada = [];
+		}
 
+	}
+
+	$scope.askForName = function(ev){
+		var confirm = $mdDialog.prompt()
+			.title('Nombre de la nueva ruta')
+			.textContent('Introduzca el nombre de la nueva ruta')
+			.placeholder('Nombre de la ruta')
+			.ariaLabel('ruta')
+			.targetEvent(ev)
+			.required(true)
+			.ok('SIGUIENTE')
+			.cancel('CANCELAR');
+
+		$mdDialog.show(confirm).then(function(result){
+			console.log("result es tipo: ",typeof(result));
+			$scope.nuevaRuta.nombre = result;
+			console.log("SE VA A CREAR UNA RUTA LLAMADA: ",result);
+
+			$scope.askForMarj();
+		},function(){
+			console.log("NO SE VA A CREAR NINGUNA RUTA");
+		});
+	}
+
+	$scope.askForMarj = function(ev){
+		var marjConfirm = $mdDialog.prompt()
+			.title('Valor mayor del beacon')
+			.textContent('Introduzca el valor mayor del Beacon')
+			.placeholder('0x0000')
+			.ariaLabel('majr')
+			.targetEvent(ev)
+			.required(true)
+			.ok('SIGUIENTE')
+			.cancel('CANCELAR');
+
+		$mdDialog.show(marjConfirm).then(function(result){
+			console.log("El nuevo valor mayor del beacon es:",result);
+
+			var mayor = "";
+			if(result.toLowerCase().includes("0x")){
+				mayor = ""+result.toLowerCase().replace("0x","");
+			}
+			else{
+				mayor = ""+result;
+				mayor = parseInt(mayor).toString(16).toUpperCase();
+				var _length = mayor.length;
+				for(var i = 0;i<4-_length;i++){
+					mayor = "0"+mayor;
+				}
+			}
+			$scope.nuevaRuta.marj = mayor;
+
+			$scope.askForMino();
+
+		},function(){
+			console.log("NO SE VA A CREAR NINGUNA RUTA :(")
+		})
+	}
+
+	$scope.askForMino = function(ev){
+		var minoConfirm = $mdDialog.prompt()
+			.title('Valor menor del beacon')
+			.textContent('Introduzca el valor menor del Beacon')
+			.placeholder('0x0000')
+			.ariaLabel('mino')
+			.targetEvent(ev)
+			.required(true)
+			.ok('SIGUIENTE')
+			.cancel('CANCELAR');
+
+		$mdDialog.show(minoConfirm).then(function(result){
+			console.log("El nuevo valor menor del beacon es:",result);
+
+			var menor = "";
+			if(result.toLowerCase().includes("0x")){
+				menor = ""+result.toLowerCase().replace("0x","");
+			}
+			else{
+				menor = ""+result;
+				menor = parseInt(menor).toString(16).toUpperCase();
+				var _length = menor.length;
+				for(var i = 0;i<4-_length;i++){
+					menor = "0"+menor;
+				}
+			}
+
+			$scope.nuevaRuta.mino = menor;
+			$scope.nuevaRuta.beacons = [];
+			console.log("MANDAR PETICION A BASE DE DATOS PARA GUARDAR");
+
+			console.log("EL OBJETO NUEVA RUTA ES: ",$scope.nuevaRuta);
+
+			var jsonStringNuevaRuta = JSON.stringify($scope.nuevaRuta);
+
+			console.log("El String a mandar por get es: ",jsonStringNuevaRuta);
+
+			$scope.xmlHttp.open("GET","http://localhost:5000/addRuta?nuevaRuta="+jsonStringNuevaRuta,false);
+			//$scope.xmlHttp.onreadystatechange = $scope.cargarRutas;
+			$scope.xmlHttp.send(null);
+
+			$scope.cargarRutas();
+
+		},function(){
+			console.log("NO SE VA A CREAR NINGUNA RUTA :(")
+		})
+	}
+
+
+
+	$scope.eliminarRuta = function(){
+		console.log("SE VA A ELIMINAR LA RUTA",$scope.rutaSeleccionada);
+
+		if($scope.rutaSeleccionada){
+			$scope.xmlHttp.open("GET","http://localhost:5000/deleteRuta?nombre="+$scope.rutaSeleccionada.nombre,false);
+			$scope.xmlHttp.send(null);
+			$scope.cargarRutas();
+		}
+	}
+
+	$scope.addRuta = function(){
+		console.log("SE VA A AGREGAR UNA RUTA");
+		$scope.askForName();
 	}
 
 	$scope.rutaMouseOver = function(beacon){
@@ -95,11 +237,7 @@ tuggerTracker.controller("myController",["$scope","$timeout","$mdDialog","$mdSid
 		d3.select('rect[id="x'+beacon.x+'y'+beacon.y+'"]').attr("class","beacon");
 	}
 
-	$scope.rutasStrings = $scope.xmlHttp.responseText.split(/JS/g);
-
-	$scope.rutasStrings.forEach(function(item){
-		$scope.rutas.push(JSON.parse(item));
-	});
+	
 
 
 	$scope.eliminarBeacon = function(beacon){
@@ -110,11 +248,11 @@ tuggerTracker.controller("myController",["$scope","$timeout","$mdDialog","$mdSid
 			return i.nombre == $scope.rutaSeleccionada.nombre;
 		});
 
-		var indexBeacon = rutaModificar.beaconsObjects.findIndex(function(item){
+		var indexBeacon = rutaModificar.objetosBeacon.findIndex(function(item){
 			return item.chipid == beacon.chipid;
 		});
 
-		rutaModificar.beaconsObjects.splice(indexBeacon,1);
+		rutaModificar.objetosBeacon.splice(indexBeacon,1);
 		rutaModificar.beacons.splice(indexBeacon,1);
 
 	}
@@ -127,7 +265,7 @@ tuggerTracker.controller("myController",["$scope","$timeout","$mdDialog","$mdSid
 
 		$scope.rutaSeleccionada.beacons.push($scope.beaconNuevoNodo.chipid);
 
-		$scope.rutaSeleccionada.beaconsObjects.push($scope.beaconNuevoNodo);
+		$scope.rutaSeleccionada.objetosBeacon.push($scope.beaconNuevoNodo);
 
 	}
 
@@ -762,11 +900,11 @@ tuggerTracker.controller("myController",["$scope","$timeout","$mdDialog","$mdSid
 				$scope.datos[msg.chipid].time = dateTime;
 
 				var newPast = Date.now()
-				console.log("NOW: ",newPast);
+				//console.log("NOW: ",newPast);
 				var actual = newPast - $scope.datos[msg.chipid].past;
 				$scope.datos[msg.chipid].latency = actual;
 				$scope.datos[msg.chipid].past = newPast;
-				console.log("OBJETO DATOS: ",$scope.datos);
+				//console.log("OBJETO DATOS: ",$scope.datos);
 				$scope.arregloDeDatos = Object.keys($scope.datos).map(i => $scope.datos[i]);
 
 				//console.log("arregloDeDatos",$scope.arregloDeDatos);
@@ -776,7 +914,7 @@ tuggerTracker.controller("myController",["$scope","$timeout","$mdDialog","$mdSid
 
 				var nuevos = $scope.valoresDialogo.find(x => x.chipid == $scope.arregloDeDatos[0].chipid);
 
-				console.log("LOS NUEVOS VALORES DEL TUGGER SON: X: ",nuevos.x, " Y: ",nuevos.y)
+				//console.log("LOS NUEVOS VALORES DEL TUGGER SON: X: ",nuevos.x, " Y: ",nuevos.y)
 				//$scope.start = $scope.map.grid[4][77]
 				if(nuevos.x && nuevos.y)
 				{
