@@ -457,7 +457,14 @@ app.get('/getRutas',function(req,res){
 				}
 			}//termina visitaRuta
 
-			visitaRuta(res,0);//se visita la primera ruta
+			if(res.length>0){
+				visitaRuta(res,0);//se visita la primera ruta
+			}
+			else{
+				console.log("se han leido todas las rutas");
+				db.close();
+				cargarDatos(respuesta);
+			}
 		});//termina callback de la busqueda de rutas
 
 	});//TERMINA LA FUNCION CALLBACK DE LA CONECCION;

@@ -77,10 +77,14 @@ tuggerTracker.controller("myController",["$scope","$timeout","$mdDialog","$mdSid
 
 		$scope.rutas = [];
 
-		$scope.rutasStrings.forEach(function(item){
-			console.log(item);
-			$scope.rutas.push(JSON.parse(item));
-		});
+		if($scope.rutasStrings[0]!== ""){
+			console.log("el arreglo rutasStrings length es:",$scope.rutasStrings.length);
+			console.log("y su unico elemento vale: ",$scope.rutasStrings[0] === "");
+			$scope.rutasStrings.forEach(function(item){
+				console.log(item);
+				$scope.rutas.push(JSON.parse(item));
+			});
+		}
 	}
 
 	$scope.cargarRutas()
@@ -93,9 +97,27 @@ tuggerTracker.controller("myController",["$scope","$timeout","$mdDialog","$mdSid
 
 		if(rutaSelect){
 			$scope.beaconsDeRutaSeleccionada = rutaSelect.objetosBeacon;
+			var coordenadasRuta = [];
+
+			$scope.beaconsDeRutaSeleccionada.forEach(function(d){
+				var coordenadaNueva = {};
+				coordenadaNueva.x = d.x;
+				coordenadaNueva.y = d.y;
+
+				console.log("la coordenada a agregar es: ",coordenadaNueva);
+
+				coordenadasRuta.push(coordenadaNueva);
+			});
+
+			//coordenadasRuta.length = coordenadasRuta.length;
+
+			$scope.drawRoutes($scope.groups, $scope.scales, coordenadasRuta);
 		}
 		else{
 			$scope.beaconsDeRutaSeleccionada = [];
+			$scope.groups.path.selectAll("path")
+				.data([])
+				.exit().remove();
 		}
 
 	}
@@ -742,6 +764,26 @@ tuggerTracker.controller("myController",["$scope","$timeout","$mdDialog","$mdSid
 		groups.position.selectAll("circle")
 		    .data([path])
 		    .exit().remove();
+	}
+
+	$scope.drawRoutes = function(groups, scales, path){
+
+		console.log("El parametro path vale: ",path);
+		var lineFunction = d3.svg.line()
+							.x(function(d){return scales.x(d.x+0.5)})
+							.y(function(d){return scales.y(d.y+0.5)})
+							.interpolate("linear");
+
+		groups.path.selectAll(".path").remove();
+
+		var lineGraph = groups.path.append("path")
+							.attr("d",lineFunction(path))
+							.attr("class","path")
+							.attr("fill","none");
+
+		groups.path.selectAll("path")
+			.data(path)
+			.exit().remove();
 	}
 
 	$scope.drawMowerHistory3 = function(groups, scales, path) 
