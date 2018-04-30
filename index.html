@@ -55,7 +55,7 @@
 
 								</md-input-container>
 								
-								<md-list-item class = "md-1-line" ng-repeat = "beacon in beaconsDeRutaSeleccionada">
+								<md-list-item class = "md-1-line" ng-repeat = "beacon in beaconsDeRutaSeleccionada track by $index">
 									<md-icon md-svg-src="image/delete.svg" ng-click = "eliminarBeacon(beacon)" ng-mouseover = "rutaMouseOver(beacon)" ng-mouseleave = "rutaMouseLeave(beacon)"></md-icon>
 									<p ng-mouseover = "rutaMouseOver(beacon)" ng-mouseleave = "rutaMouseLeave(beacon)"> {{ beacon.chipid }} </p>
 									<md-divider md-inset=""></md-divider>

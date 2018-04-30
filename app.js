@@ -170,7 +170,7 @@ tuggerTracker.controller("myController",["$scope","$timeout","$mdDialog","$mdSid
 					mayor = "0"+mayor;
 				}
 			}
-			$scope.nuevaRuta.marj = mayor;
+			$scope.nuevaRuta.marj = mayor.toUpperCase();
 
 			$scope.askForMino();
 
@@ -206,7 +206,7 @@ tuggerTracker.controller("myController",["$scope","$timeout","$mdDialog","$mdSid
 				}
 			}
 
-			$scope.nuevaRuta.mino = menor;
+			$scope.nuevaRuta.mino = menor.toUpperCase();
 			$scope.nuevaRuta.beacons = [];
 			console.log("MANDAR PETICION A BASE DE DATOS PARA GUARDAR");
 
@@ -781,14 +781,21 @@ tuggerTracker.controller("myController",["$scope","$timeout","$mdDialog","$mdSid
 							.attr("class","path")
 							.attr("fill","none");
 
+
+
+
 		groups.path.selectAll("path")
 			.data(path)
 			.exit().remove();
 	}
 
-	$scope.drawMowerHistory3 = function(groups, scales, path) 
+	$scope.drawMowerHistory3 = function(groups, scales, path, beacon) 
 	{
+		var endOfAnimation = function(){
+			$scope.drawRoutes($scope.groups,$scope.scales,$scope.getRouteProgress(beacon))
+		}
 
+		console.log("beacon recibido en drawMowerHistory3",beacon);
 		groups.position.select("circle")
 		    .data(path)
 		    .enter()
@@ -806,6 +813,7 @@ tuggerTracker.controller("myController",["$scope","$timeout","$mdDialog","$mdSid
 		    // .attr("duration",function(d,i){return 2000})
 		    .attr("cx",function(d){return scales.x(d.x+0.5)})
 		    .transition()
+		    .each("end",endOfAnimation)
 		    // .attr("delay",function(d,i){return 5000})
 		    // .attr("duration",function(d,i){return 2000})
 		    .attr("cy",function(d){return scales.y(d.y+0.5)})
@@ -817,6 +825,44 @@ tuggerTracker.controller("myController",["$scope","$timeout","$mdDialog","$mdSid
 		    .data([path])
 		    .exit().remove();
 
+
+		var __ruta = $scope.getRouteProgress(beacon);
+
+		console.log("__ruta:",__ruta);
+	}
+
+	$scope.getRouteProgress = function(beacon){
+
+		console.log("objeto recibido en getRouteProgress",beacon);
+		console.log("$scope.rutas",$scope.rutas);
+
+		var indexRuta = $scope.rutas.findIndex(function(item){
+			return item.marj == beacon.maxLoad && item.mino == beacon.minLoad;
+		});
+
+		console.log("El index de la ruta es: ",indexRuta);
+		console.log("La ruta es: ",$scope.rutas[indexRuta]);
+
+		var indexMax = $scope.rutas[indexRuta].objetosBeacon.findIndex(function(item){
+			return (item.chipid == beacon.chipid);
+		});
+
+		console.log("index: ",indexMax);
+		console.log("beaconsDeRutaSeleccionada",$scope.rutas);
+
+		var routePath = []
+
+		$scope.rutas[indexRuta].objetosBeacon.forEach(function(item,idx){
+			var _coord = {x:item.x,y:item.y};
+
+			if(idx<=indexMax){
+				routePath.push(_coord);
+			}
+		});
+
+		console.log("LA RUTA HASTA EL MOMENTO ES: ",routePath);
+
+		return routePath;
 	}
 
 
@@ -930,6 +976,8 @@ tuggerTracker.controller("myController",["$scope","$timeout","$mdDialog","$mdSid
 		socket.on('updates',function(msg){
 			$scope.$apply(function(){
 
+				console.log("El mensaje recibido en el socket es: ",msg);
+
 				if($scope.datos[msg.chipid].timer){
 					$scope.datos[msg.chipid].timer.onOff = false;
 				}
@@ -960,7 +1008,7 @@ tuggerTracker.controller("myController",["$scope","$timeout","$mdDialog","$mdSid
 				//$scope.start = $scope.map.grid[4][77]
 				if(nuevos.x && nuevos.y)
 				{
-					$scope.drawMowerHistory3($scope.groups, $scope.scales, [$scope.map.grid[nuevos.x][nuevos.y]]);
+					$scope.drawMowerHistory3($scope.groups, $scope.scales, [$scope.map.grid[nuevos.x][nuevos.y]],msg);
 				}
 
 				$scope.datos[msg.chipid].timer = $scope.createTimer(function(){
