@@ -15,9 +15,11 @@ var tuggerTracker = angular.module('tuggerTracker',['ngAria','ngMaterial']);
 
 
 tuggerTracker.controller("myController",["$scope","$timeout","$mdDialog","$mdSidenav",function($scope,$timeout,$mdDialog,$mdSidenav){
+// tuggerTracker.controller("myController",["$scope","$timeout","$mdDialog","$mdSidenav", "$http",function($scope,$timeout,$mdDialog,$mdSidenav){
 // tuggerTracker.controller("myController",["$scope","$timeout","$mdDialog",function($scope,$timeout,$mdDialog){
 
-
+	$scope.originURL = window.location.origin;
+	console.log("$scope.originURL", window.location.origin);
 	$scope.toggleLeft = buildToggler('left');
     $scope.toggleRight = buildToggler('right');
     $scope.listaRutas = false;
@@ -36,9 +38,15 @@ tuggerTracker.controller("myController",["$scope","$timeout","$mdDialog","$mdSid
 
 	$scope.datos = {};
 
+	// $http.get
+
 	$scope.xmlHttp = new XMLHttpRequest();
 
-	$scope.xmlHttp.open("GET","http://localhost:5000/demoMongo",false);
+	$scope.tempURL = "";
+	$scope.tempURL = $scope.originURL+"/demoMongo";
+	console.log("$scope.tempURL",$scope.tempURL);
+
+	$scope.xmlHttp.open("GET",$scope.tempURL,false);
 	$scope.xmlHttp.send(null);
 	console.log($scope.xmlHttp.responseText);
 	$scope.arregloDemo = $scope.xmlHttp.responseText.match(/{.+?}/g);
@@ -53,16 +61,7 @@ tuggerTracker.controller("myController",["$scope","$timeout","$mdDialog","$mdSid
 
 	console.log("valoresDialogo: ", $scope.valoresDialogo);
 
-	for(var i = 0;i<$scope.valoresDialogo.length;i++)
-	{
-		$scope.datos[$scope.valoresDialogo[i].chipid] = $scope.valoresDialogo[i];
-		$scope.datos[$scope.valoresDialogo[i].chipid].distancia = 1000;
-		$scope.datos[$scope.valoresDialogo[i].chipid].latency = 0;
-		$scope.datos[$scope.valoresDialogo[i].chipid].past = 0;
-		//$scope.datos[$scope.valoresDialogo[i].chipid].lugar = $scope.valoresDialogo[];
-	}
 
-	console.log("$scope.datos",$scope.datos);
 
 	$scope.rutas = [];
 	$scope.rutaSeleccionada;
@@ -70,7 +69,12 @@ tuggerTracker.controller("myController",["$scope","$timeout","$mdDialog","$mdSid
 	$scope.beaconsDeRutaSeleccionada = [];
 
 	$scope.cargarRutas = function(){
-		$scope.xmlHttp.open("GET","http://localhost:5000/getRutas",false);
+
+		$scope.tempURL = "";
+		$scope.tempURL = $scope.originURL+"/getRutas";
+		console.log("$scope.tempURL",$scope.tempURL);
+
+		$scope.xmlHttp.open("GET",$scope.tempURL,false);
 		$scope.xmlHttp.send(null);
 		console.log("RUTAS RESPUESTA:",$scope.xmlHttp.responseText);
 		$scope.rutasStrings = $scope.xmlHttp.responseText.split(/JS/g);
@@ -88,6 +92,31 @@ tuggerTracker.controller("myController",["$scope","$timeout","$mdDialog","$mdSid
 	}
 
 	$scope.cargarRutas()
+
+	console.log("RUTAS ANTES DE CREAR $scope.datos: ",$scope.rutas);
+
+	// for(var i = 0;i<$scope.valoresDialogo.length;i++)
+	// {
+	// 	$scope.datos[$scope.valoresDialogo[i].chipid] = $scope.valoresDialogo[i];
+	// 	$scope.datos[$scope.valoresDialogo[i].chipid].distancia = 1000;
+	// 	$scope.datos[$scope.valoresDialogo[i].chipid].latency = 0;
+	// 	$scope.datos[$scope.valoresDialogo[i].chipid].past = 0;
+	// 	//$scope.datos[$scope.valoresDialogo[i].chipid].lugar = $scope.valoresDialogo[];
+	// }
+
+	for(var i = 0;i<$scope.rutas.length;i++){
+		$scope.rutas.position = undefined;
+		$scope.datos[$scope.rutas[i].nombre] = {}
+		for(var j = 0;j<$scope.valoresDialogo.length;j++){
+			$scope.datos[$scope.rutas[i].nombre][$scope.valoresDialogo[j].chipid] = $scope.valoresDialogo[j];
+			$scope.datos[$scope.rutas[i].nombre][$scope.valoresDialogo[j].chipid].distancia = 1000;
+			$scope.datos[$scope.rutas[i].nombre][$scope.valoresDialogo[j].chipid].latency = 0;
+			$scope.datos[$scope.rutas[i].nombre][$scope.valoresDialogo[j].chipid].past = 0;
+		}
+	}
+
+	console.log("$scope.datos",$scope.datos);
+
 
 	$scope.cambioDeRuta = function(){
 
@@ -216,7 +245,12 @@ tuggerTracker.controller("myController",["$scope","$timeout","$mdDialog","$mdSid
 
 			console.log("El String a mandar por get es: ",jsonStringNuevaRuta);
 
-			$scope.xmlHttp.open("GET","http://localhost:5000/addRuta?nuevaRuta="+jsonStringNuevaRuta,false);
+			$scope.tempURL = "";
+			$scope.tempURL = $scope.originURL+"/addRuta?nuevaRuta="+jsonStringNuevaRuta;
+			console.log("$scope.tempURL",$scope.tempURL);
+
+
+			$scope.xmlHttp.open("GET",$scope.tempURL,false);
 			//$scope.xmlHttp.onreadystatechange = $scope.cargarRutas;
 			$scope.xmlHttp.send(null);
 
@@ -233,7 +267,12 @@ tuggerTracker.controller("myController",["$scope","$timeout","$mdDialog","$mdSid
 		console.log("SE VA A ELIMINAR LA RUTA",$scope.rutaSeleccionada);
 
 		if($scope.rutaSeleccionada){
-			$scope.xmlHttp.open("GET","http://localhost:5000/deleteRuta?nombre="+$scope.rutaSeleccionada.nombre,false);
+
+			$scope.tempURL = "";
+			$scope.tempURL = $scope.originURL+"/deleteRuta?nombre="+$scope.rutaSeleccionada.nombre;
+			console.log("$scope.tempURL",$scope.tempURL);
+
+			$scope.xmlHttp.open("GET",$scope.tempURL,false);
 			$scope.xmlHttp.send(null);
 			$scope.cargarRutas();
 		}
@@ -298,7 +337,12 @@ tuggerTracker.controller("myController",["$scope","$timeout","$mdDialog","$mdSid
 
 		console.log($scope.rutaSeleccionada);
 
-		$scope.xmlHttp.open("GET","http://localhost:5000/updateRutas?nuevosValores="+JSON.stringify($scope.rutaSeleccionada),true);
+		$scope.tempURL = "";
+		$scope.tempURL = $scope.originURL+"/updateRutas?nuevosValores="+JSON.stringify($scope.rutaSeleccionada);
+		console.log("$scope.tempURL",$scope.tempURL);
+
+		// $scope.xmlHttp.open("GET",$scope.originURL+"/updatesRutas?nuevosValores="+JSON.stringify($scope.rutaSeleccionada),true);
+		$scope.xmlHttp.open("GET",$scope.tempURL,true);
 		$scope.xmlHttp.send(null);
 		$scope.toggleLeft();
 	}
@@ -315,7 +359,12 @@ tuggerTracker.controller("myController",["$scope","$timeout","$mdDialog","$mdSid
 		var xmlHttp = new XMLHttpRequest();
 
 		/*Se abre una coneccion donde se solicita al servidor obtener todos los beacons registrados, esto ocurre de forma sincrona*/
-		xmlHttp.open("GET","http://localhost:5000/demoMongo",false);
+
+		$scope.tempURL = "";
+		$scope.tempURL = $scope.originURL+"/demoMongo";
+		console.log("$scope.tempURL",$scope.tempURL);
+
+		xmlHttp.open("GET",$scope.tempURL,false);
 		xmlHttp.send(null);
 
 		//Linea de debugging que permite ver el resultado obtenido durante la peticion, descomentar para reactivar
@@ -356,6 +405,7 @@ tuggerTracker.controller("myController",["$scope","$timeout","$mdDialog","$mdSid
 					$scope.y = vars.y;//dentro del scope del dialogo se guarda la variable y
 					$scope.todos = todos;//dentro del scope del dialgo se guarda la informacion de los beacons obtenida de la base de datos
 					$scope.parentScope = parentScope;
+					$scope.originURL = $scope.parentScope.originURL;
 
 
 					$scope.seleccionado = $scope.todos.find(function(item){
@@ -419,8 +469,8 @@ tuggerTracker.controller("myController",["$scope","$timeout","$mdDialog","$mdSid
 									nuevosValores.y = $scope.y;
 
 
-									// xmlHttp.open("GET","http://localhost:5000/updateBeacon?x="+$scope.x+"&y="+$scope.y+"&chipid="+item.chipid,true);
-									// xmlHttp.open("GET","http://localhost:5000/updateBeacon?nuevosValores="+nuevosValoresJsonString,true);
+									// xmlHttp.open("GET",$scope.originURL+"/updateBeacon?x="+$scope.x+"&y="+$scope.y+"&chipid="+item.chipid,true);
+									// xmlHttp.open("GET",$scope.originURL+"/updateBeacon?nuevosValores="+nuevosValoresJsonString,true);
 
 
 									//console.log(xmlHttp.responseText);
@@ -447,14 +497,23 @@ tuggerTracker.controller("myController",["$scope","$timeout","$mdDialog","$mdSid
 								nuevosValores.mode = item.mode;
 
 								nuevosValoresJsonString = JSON.stringify(nuevosValores);
-								xmlHttp.open("GET","http://localhost:5000/updateBeacon?nuevosValores="+nuevosValoresJsonString,true);
+
+								$scope.tempURL = "";
+								$scope.tempURL = $scope.originURL+"/updateBeacon?nuevosValores="+nuevosValoresJsonString;
+								console.log("$scope.tempURL",$scope.tempURL);
+								xmlHttp.open("GET",$scope.tempURL,true);
+								// xmlHttp.open("GET",$scope.originURL+"/updateBeacon?nuevosValores="+nuevosValoresJsonString,true);
 								xmlHttp.send(null);
 
 							});
 
 							if(!toBeDeleted){
 								console.log("SE VAN A ELIMINAR LAS COORDENADAS");
-								xmlHttp.open("GET","http://localhost:5000/removeBeaconMap?x="+$scope.x+"&y="+$scope.y,true);
+								$scope.tempURL = "";
+								$scope.tempURL = $scope.originURL+"/removeBeaconMap?x="+$scope.x+"&y="+$scope.y;
+								console.log("$scope.tempURL",$scope.tempURL);
+								// xmlHttp.open("GET",$scope.originURL+"/removeBeaconMap?x="+$scope.x+"&y="+$scope.y,true);
+								xmlHttp.open("GET",$scope.tempURL,true);
 								xmlHttp.send(null);
 							}
 
@@ -478,13 +537,13 @@ tuggerTracker.controller("myController",["$scope","$timeout","$mdDialog","$mdSid
 									$scope.parentScope.valoresDialogo.push(JSON.parse(item));
 								});
 
-								for(var i = 0;i<$scope.parentScope.valoresDialogo.length;i++)
-								{
-									$scope.parentScope.datos[$scope.parentScope.valoresDialogo[i].chipid] = $scope.parentScope.valoresDialogo[i];
-									$scope.parentScope.datos[$scope.parentScope.valoresDialogo[i].chipid].distancia = 1000;
-									$scope.parentScope.datos[$scope.parentScope.valoresDialogo[i].chipid].latency = 0;
-									$scope.parentScope.datos[$scope.parentScope.valoresDialogo[i].chipid].past = 0;
-								}
+								// for(var i = 0;i<$scope.parentScope.valoresDialogo.length;i++)
+								// {
+								// 	$scope.parentScope.datos[$scope.parentScope.valoresDialogo[i].chipid] = $scope.parentScope.valoresDialogo[i];
+								// 	$scope.parentScope.datos[$scope.parentScope.valoresDialogo[i].chipid].distancia = 1000;
+								// 	$scope.parentScope.datos[$scope.parentScope.valoresDialogo[i].chipid].latency = 0;
+								// 	$scope.parentScope.datos[$scope.parentScope.valoresDialogo[i].chipid].past = 0;
+								// }
 
 								$scope.parentScope.initEverything();
 								
@@ -492,7 +551,14 @@ tuggerTracker.controller("myController",["$scope","$timeout","$mdDialog","$mdSid
 
 							$scope.xmlHttp.onreadystatechange = something;
 
-							$scope.xmlHttp.open("GET","http://localhost:5000/demoMongo",true);
+							$scope.tempURL = "";
+							$scope.tempURL = $scope.originURL+"/demoMongo";
+							console.log("$scope.tempURL",$scope.tempURL);
+
+
+							$scope.xmlHttp.open("GET",$scope.tempURL,true);
+
+							// $scope.xmlHttp.open("GET",$scope.originURL+"/demoMongo",true);
 
 							$scope.xmlHttp.send(null);
 
@@ -796,34 +862,49 @@ tuggerTracker.controller("myController",["$scope","$timeout","$mdDialog","$mdSid
 		}
 
 		console.log("beacon recibido en drawMowerHistory3",beacon);
-		groups.position.select("circle")
-		    .data(path)
-		    .enter()
-		    .append("circle")
-		    .attr("cx",function(d){return console.log("d",d);scales.x(d.x+0.5)})
-		    .attr("cy",function(d){return scales.y(d.y+0.5)})
-		    .attr("r",function(d){return $scope.circleRadius})
-		    .attr("class",function(d){return "position"});
+		console.log("path: ",path);
 
-		groups.position.select("circle")
-		    .data(path)
-		    .transition()
-		    .duration(1500)
-		    // .attr("delay",function(d,i){return 5000})
-		    // .attr("duration",function(d,i){return 2000})
+		var circleData = groups.position.selectAll("circle")
+		    .data(path);
+
+		circleData.exit().remove();
+		
+		var circles = circleData    
+		    .enter()
+		    .append("circle");
+
+		console.log("CIRCLES VALE: ",circles)
+
+		var circleAttibutes = circleData
+			.transition()
+			.duration(300)
 		    .attr("cx",function(d){return scales.x(d.x+0.5)})
 		    .transition()
-		    .each("end",endOfAnimation)
-		    // .attr("delay",function(d,i){return 5000})
-		    // .attr("duration",function(d,i){return 2000})
+			.duration(300)
 		    .attr("cy",function(d){return scales.y(d.y+0.5)})
+		    .each("end",endOfAnimation)
 		    .attr("r",function(d){return $scope.circleRadius})
 		    .attr("class",function(d){return "position"});
+
+		// groups.position.selectAll("circle")
+		//     .data(path)
+		//     .transition()
+		//     .duration(300)
+		//     // .attr("delay",function(d,i){return 5000})
+		//     // .attr("duration",function(d,i){return 2000})
+		//     .attr("cx",function(d){return scales.x(d.x+0.5)})
+		//     .transition()
+		//     .each("end",endOfAnimation)
+		//     // .attr("delay",function(d,i){return 5000})
+		//     // .attr("duration",function(d,i){return 2000})
+		//     .attr("cy",function(d){return scales.y(d.y+0.5)})
+		//     .attr("r",function(d){return $scope.circleRadius})
+		//     .attr("class",function(d){return "position"});
 		    
 
-		groups.position.select("circle")
-		    .data([path])
-		    .exit().remove();
+		// groups.position.selectAll("circle")
+		//     .data([path])
+		//     .exit().remove();
 
 
 		var __ruta = $scope.getRouteProgress(beacon);
@@ -936,7 +1017,8 @@ tuggerTracker.controller("myController",["$scope","$timeout","$mdDialog","$mdSid
 
 		$scope.map = $scope.buildMap2($scope.gridSize, $scope.ratios);
 
-		$scope.start = $scope.map.grid[4][77]
+		$scope.start = $scope.map.grid[4][77];
+		$scope.start2 = $scope.map.grid[20][2];
 
 		console.log("map = ",$scope.map);
 
@@ -958,7 +1040,7 @@ tuggerTracker.controller("myController",["$scope","$timeout","$mdDialog","$mdSid
 		$scope.groups = { path:$scope.svgContainer.append("g"),
 		                position:$scope.svgContainer.append("g") };
 
-		$scope.drawMowerHistory2($scope.groups, $scope.scales, [$scope.start]);
+		$scope.drawMowerHistory2($scope.groups, $scope.scales, [$scope.start,$scope.start2]);
 	}
 
 	$(window).on("resize.doResize", function (){
@@ -978,41 +1060,64 @@ tuggerTracker.controller("myController",["$scope","$timeout","$mdDialog","$mdSid
 
 				console.log("El mensaje recibido en el socket es: ",msg);
 
-				if($scope.datos[msg.chipid].timer){
-					$scope.datos[msg.chipid].timer.onOff = false;
+				if($scope.datos[msg.nombreRuta][msg.chipid].timer){
+					$scope.datos[msg.nombreRuta][msg.chipid].timer.onOff = false;
 				}
 
-				$scope.datos[msg.chipid].distancia = parseFloat(msg.distancia);
+				$scope.datos[msg.nombreRuta][msg.chipid].distancia = parseFloat(msg.distancia);
 				var lastTime = new Date();
 
 
 				var dateTime = ""+ lastTime.getHours() + ":" + lastTime.getMinutes() + ":" + lastTime.getSeconds();
-				$scope.datos[msg.chipid].time = dateTime;
+				$scope.datos[msg.nombreRuta][msg.chipid].time = dateTime;
 
 				var newPast = Date.now()
 				//console.log("NOW: ",newPast);
-				var actual = newPast - $scope.datos[msg.chipid].past;
-				$scope.datos[msg.chipid].latency = actual;
-				$scope.datos[msg.chipid].past = newPast;
-				//console.log("OBJETO DATOS: ",$scope.datos);
-				$scope.arregloDeDatos = Object.keys($scope.datos).map(i => $scope.datos[i]);
+				var actual = newPast - $scope.datos[msg.nombreRuta][msg.chipid].past;
+				$scope.datos[msg.nombreRuta][msg.chipid].latency = actual;
+				$scope.datos[msg.nombreRuta][msg.chipid].past = newPast;
+				console.log("OBJETO DATOS: ",$scope.datos[msg.nombreRuta]);
+				$scope.arregloDeDatos = Object.keys($scope.datos[msg.nombreRuta]).map(i => $scope.datos[msg.nombreRuta][i]);
 
-				//console.log("arregloDeDatos",$scope.arregloDeDatos);
+
+				console.log("arregloDeDatos",$scope.arregloDeDatos);
 				$scope.arregloDeDatos.sort(function(a,b){
 					return parseFloat(a.distancia)-parseFloat(b.distancia);
 				});
 
 				var nuevos = $scope.valoresDialogo.find(x => x.chipid == $scope.arregloDeDatos[0].chipid);
 
-				//console.log("LOS NUEVOS VALORES DEL TUGGER SON: X: ",nuevos.x, " Y: ",nuevos.y)
-				//$scope.start = $scope.map.grid[4][77]
-				if(nuevos.x && nuevos.y)
-				{
-					$scope.drawMowerHistory3($scope.groups, $scope.scales, [$scope.map.grid[nuevos.x][nuevos.y]],msg);
+
+				var indexRutaCorr = $scope.rutas.findIndex(function(item){
+					return item.nombre == msg.nombreRuta;
+				});
+
+				console.log("EL INDEX DE LA RUTA CORRESPONDIENTE ES: ", indexRutaCorr);
+
+				if(indexRutaCorr >= 0){
+					$scope.rutas[indexRutaCorr].position = nuevos;
 				}
 
-				$scope.datos[msg.chipid].timer = $scope.createTimer(function(){
-					$scope.datos[msg.chipid].distancia = 1000;
+				var nuevasCoordenadas = []
+
+				$scope.rutas.forEach(function(xRute){
+					if(xRute.position){
+						nuevasCoordenadas.push($scope.map.grid[xRute.position.x][xRute.position.y]);
+					}
+				});
+
+				//console.log("LOS NUEVOS VALORES DEL TUGGER SON: X: ",nuevos.x, " Y: ",nuevos.y)
+				//$scope.start = $scope.map.grid[4][77]
+				if(nuevasCoordenadas)
+				{
+					console.log("LAS NUEVAS COORDENADAS SON: ",nuevasCoordenadas);
+					//$scope.drawMowerHistory3($scope.groups, $scope.scales, [$scope.map.grid[nuevos.x][nuevos.y],$scope.map.grid[nuevos.x-5][nuevos.y+1]],msg);
+					// $scope.drawMowerHistory3($scope.groups, $scope.scales, [$scope.map.grid[nuevos.x][nuevos.y]],msg);
+					$scope.drawMowerHistory3($scope.groups, $scope.scales, nuevasCoordenadas,msg);
+				}
+
+				$scope.datos[msg.nombreRuta][msg.chipid].timer = $scope.createTimer(function(){
+					$scope.datos[msg.nombreRuta][msg.chipid].distancia = 1000;
 				},5000);
 			});
 

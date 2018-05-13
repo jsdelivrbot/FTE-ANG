@@ -226,26 +226,43 @@ mqttCallback = function(topic,message)
 		{
 
 			// if(parseInt(o.minLoad,16) == parseInt("CACA",16) && parseInt(o.maxLoad,16) == parseInt("BEBE",16)){
-			if(parseInt(o.minLoad,16) == 6081 && parseInt(o.maxLoad,16) == 15){
 
-				MongoClient.connect(url, function(err, db){
-					if (err) throw err;
+			MongoClient.connect(url, function(err, db){
+				if (err) throw err;
 
-					var dbo = db.db("mydb");
+				var dbo = db.db("mydb");
 
-					var query = {chipid:o.chipid};
+				var query = {chipid:o.chipid};
 
-					dbo.collection("RutasTugger").find({}).toArray(function(err,result){
-						if(err) throw err;
+				dbo.collection("RutasTugger").find({}).toArray(function(err,result){
+					if(err) throw err;
 
-						db.close();
+
+					var rutaCorrespondiente = result.find(function(item){
+						return item.mino == o.minLoad && item.marj == o.maxLoad;
 					});
+
+
+					if(rutaCorrespondiente){
+						console.log("RUTAS EN MENSAJE MQTT CALLBACK ES: ",result);
+						o.nombreRuta = rutaCorrespondiente.nombre;
+						io.emit('updates',o)
+						console.log("LA RUTA CORRESPONDIENTE ES: ",rutaCorrespondiente);
+						console.log("EL MENSAJE UPDATE EMITIDO FUE: ",o);
+					}
+
+					db.close();
 				});
+			});
 
 
-				io.emit('updates',o);
-				//console.log(o);
-			}
+			// if(parseInt(o.minLoad,16) == 6081 && parseInt(o.maxLoad,16) == 15){
+
+
+
+			// 	io.emit('updates',o);
+			// 	//console.log(o);
+			// }
 
 		}
 	}
