@@ -77,9 +77,9 @@ svg {
 }
 
 .position {
-	fill: #C9EBF0;
-	stroke-width: 3px;
-	stroke: #2973F2;
+	fill: red;
+	stroke-width: 4px;
+	stroke: black;
 }
 
 .positionNumber {

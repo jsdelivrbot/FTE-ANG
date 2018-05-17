@@ -1001,7 +1001,7 @@ tuggerTracker.controller("myController",["$scope","$timeout","$mdDialog","$mdSid
 
 		$scope.squareLength = ($scope.gridSize.x/$scope.gridSize.y)>($scope.windowSize.x/$scope.windowSize.y) ? Math.floor($scope.windowSize.x*.95)/$scope.gridSize.x:Math.floor($scope.windowSize.y*.95)/$scope.gridSize.y;
 
-		$scope.circleRadius = $scope.squareLength;
+		$scope.circleRadius = $scope.squareLength*1.5;
 
 		$scope.svgSize = $scope.getSvgSize($scope.gridSize, $scope.squareLength);
 
