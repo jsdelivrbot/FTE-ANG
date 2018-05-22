@@ -17,10 +17,9 @@
 	
 		<h1>Tugger Tracker</h1>
 
-		<section layout="row" flex>
+		<section layout="column" flex>
 
-			<md-sidenav class="md-sidenav-left" md-component-id="left"
-			            md-disable-backdrop md-whiteframe="4">
+			<md-sidenav class="md-sidenav-left" md-component-id="left" md-disable-backdrop md-whiteframe="4">
 				
 
 				<md-toolbar class="md-theme-indigo">
@@ -96,12 +95,20 @@
 
 			<md-content flex layout-padding>
 
-				<div layout="row" layout-align="top center">
+				<div layout="column" layout-align="top left">
 
 			    	<div>
 				    	<md-button ng-click="toggleLeft()" class="md-raised">
 				        	Opciones y Herramientas
 				    	</md-button>
+				    </div>
+
+				    <div>
+						<md-button ng-click="alert('hola')" class = "md-raised">
+							Estadisticos
+						</md-button>
+
+
 				    </div>
 
 				</div>
