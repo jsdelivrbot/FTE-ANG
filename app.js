@@ -1154,7 +1154,7 @@ tuggerTracker.controller("myController",["$scope","$timeout","$mdDialog","$mdSid
 
 				// $scope.rutas.forEach(function(xRute){
 					if($scope.rutas[indexRutaCorr].position){
-						nuevasCoordenadas.push($scope.map.grid[xRute.position.x][xRute.position.y]);
+						nuevasCoordenadas.push($scope.map.grid[$scope.rutas[indexRutaCorr].position.x][$scope.rutas[indexRutaCorr].position.y]);
 					}
 				// });
 
