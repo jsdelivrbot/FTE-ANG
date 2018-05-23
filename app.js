@@ -895,7 +895,7 @@ tuggerTracker.controller("myController",["$scope","$timeout","$mdDialog","$mdSid
 							.attr("d",lineFunction(path))
 							.attr("class","path")
 							.attr("fill","none");
-							
+
 		groups.path.selectAll("path")
 			.data(path)
 			.exit().remove();
@@ -1152,11 +1152,11 @@ tuggerTracker.controller("myController",["$scope","$timeout","$mdDialog","$mdSid
 
 				var nuevasCoordenadas = []
 
-				$scope.rutas.forEach(function(xRute){
-					if(xRute.position){
+				// $scope.rutas.forEach(function(xRute){
+					if($scope.rutas[indexRutaCorr].position){
 						nuevasCoordenadas.push($scope.map.grid[xRute.position.x][xRute.position.y]);
 					}
-				});
+				// });
 
 				//console.log("LOS NUEVOS VALORES DEL TUGGER SON: X: ",nuevos.x, " Y: ",nuevos.y)
 				//$scope.start = $scope.map.grid[4][77]
