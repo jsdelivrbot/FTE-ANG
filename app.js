@@ -895,10 +895,7 @@ tuggerTracker.controller("myController",["$scope","$timeout","$mdDialog","$mdSid
 							.attr("d",lineFunction(path))
 							.attr("class","path")
 							.attr("fill","none");
-
-
-
-
+							
 		groups.path.selectAll("path")
 			.data(path)
 			.exit().remove();
