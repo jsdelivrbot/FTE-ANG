@@ -14,15 +14,64 @@ var tuggerTracker = angular.module('tuggerTracker',['ngAria','ngMaterial']);
 //   });
 
 
-tuggerTracker.controller("myController",["$scope","$timeout","$mdDialog","$mdSidenav",function($scope,$timeout,$mdDialog,$mdSidenav){
+tuggerTracker.controller("myController",["$scope","$timeout","$mdDialog","$mdSidenav","$interval",function($scope,$timeout,$mdDialog,$mdSidenav,$interval){
 // tuggerTracker.controller("myController",["$scope","$timeout","$mdDialog","$mdSidenav", "$http",function($scope,$timeout,$mdDialog,$mdSidenav){
 // tuggerTracker.controller("myController",["$scope","$timeout","$mdDialog",function($scope,$timeout,$mdDialog){
 
+	$scope.CurrentDate = new Date();
+	$scope.ReferenceDate = new Date();
+	$scope.running = false;
+	$scope.update = true;
+	$scope.middle = false;
+	
 	$scope.originURL = window.location.origin;
 	console.log("$scope.originURL", window.location.origin);
 	$scope.toggleLeft = buildToggler('left');
     $scope.toggleRight = buildToggler('right');
     $scope.listaRutas = false;
+
+    $scope.minutosPastLap = "00";
+    $scope.segundosPastLap = "00";
+    $scope.miliSegundosPastLap = "00";
+
+    $scope.minutosNowLap = "00";
+    $scope.segundosNowLap = "00";
+    $scope.miliSegundosNowLap = "00";
+
+	$interval(function() {
+		$scope.CurrentDate = new Date()
+		// $scope.miliSegundosNowLap = Math.floor(new Date().getMilliseconds()/10) - Math.floor($scope.ReferenceDate.getMilliseconds()/10);
+		if($scope.running)
+		{
+			var timeDif = new Date(new Date().getTime() - $scope.ReferenceDate.getTime());
+			$scope.miliSegundosNowLap = Math.floor(timeDif.getMilliseconds()/10)<10? "0"+Math.floor(timeDif.getMilliseconds()/10):Math.floor(timeDif.getMilliseconds()/10);
+			$scope.segundosNowLap = timeDif.getSeconds()<10 ? "0"+timeDif.getSeconds():timeDif.getSeconds();
+			$scope.minutosNowLap = timeDif.getMinutes()<10 ? "0"+timeDif.getMinutes():timeDif.getMinutes();
+			$scope.update = true;
+		}else{
+			if($scope.update)
+			{
+				$scope.minutosPastLap = $scope.minutosNowLap;
+				$scope.segundosPastLap = $scope.segundosNowLap;
+				$scope.miliSegundosPastLap = $scope.miliSegundosNowLap;
+				$scope.update = false;
+			}
+
+			$scope.minutosNowLap = "00";
+			$scope.segundosNowLap = "00";
+			$scope.miliSegundosNowLap = "00";
+		}
+		
+	},10);
+
+	$scope.startSW = function(){
+		$scope.ReferenceDate = new Date();
+		$scope.running = true;
+	}
+
+	$scope.stopSW = function(){
+		$scope.running = false;
+	}
 
     function buildToggler(componentId) {
       return function() {
@@ -858,7 +907,13 @@ tuggerTracker.controller("myController",["$scope","$timeout","$mdDialog","$mdSid
 	$scope.drawMowerHistory3 = function(groups, scales, path, beacon) 
 	{
 		var endOfAnimation = function(){
-			$scope.drawRoutes($scope.groups,$scope.scales,$scope.getRouteProgress(beacon))
+			if(beacon.chipid == "4427747"){
+				var beaconSubstituto = beacon;
+				beaconSubstituto.chipid = "3739794"
+				$scope.drawRoutes($scope.groups,$scope.scales,$scope.getRouteProgress(beaconSubstituto))
+			}else{
+				$scope.drawRoutes($scope.groups,$scope.scales,$scope.getRouteProgress(beacon))
+			}
 		}
 
 		console.log("beacon recibido en drawMowerHistory3",beacon);
@@ -1113,6 +1168,20 @@ tuggerTracker.controller("myController",["$scope","$timeout","$mdDialog","$mdSid
 					console.log("LAS NUEVAS COORDENADAS SON: ",nuevasCoordenadas);
 					//$scope.drawMowerHistory3($scope.groups, $scope.scales, [$scope.map.grid[nuevos.x][nuevos.y],$scope.map.grid[nuevos.x-5][nuevos.y+1]],msg);
 					// $scope.drawMowerHistory3($scope.groups, $scope.scales, [$scope.map.grid[nuevos.x][nuevos.y]],msg);
+					if(!$scope.running){
+						if(msg.chipid == "7792632"){
+							$scope.startSW();
+						}
+					}
+					else if(msg.chipid != "4427747" && msg.chipid != "7792632"){
+						
+						$scope.middle = true;
+					}
+
+					if($scope.running && $scope.middle && (msg.chipid == "4427747")){
+						$scope.stopSW();
+						$scope.middle = false;
+					}
 					$scope.drawMowerHistory3($scope.groups, $scope.scales, nuevasCoordenadas,msg);
 				}
 
@@ -1121,6 +1190,15 @@ tuggerTracker.controller("myController",["$scope","$timeout","$mdDialog","$mdSid
 				},5000);
 			});
 
+		});
+
+		socket.on('stopwatch',function(msg){
+			if(msg.command === "start"){
+				$scope.startSW();
+			}
+			else{
+				$scope.stopSW();
+			}
 		});
 
 		return false;

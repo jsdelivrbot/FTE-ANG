@@ -104,11 +104,46 @@
 				    </div>
 
 				    <div>
-						<md-button ng-click="alert('hola')" class = "md-raised">
-							Estadisticos
-						</md-button>
+						<!-- <md-button ng-click="alert('hola')" class = "md-raised">
+							Estadísticos
+						</md-button> -->
+						<md-whiteframe class="md-whiteframe-1dp" flex-sm="20" flex-gt-sm="20" flex-gt-md="20" layout = "column" layout-align="center center">
+							<div layout = "row">
+								<h1>Hora- </h1>
+								<h1>
+									{{CurrentDate | date:'h:mm:ss a'}}
+								</h1>
+							</div>
 
+							<div layout = "row">
+								<h1>Lap anterior- </h1>
+								<h1>
+									<span ng-model="minutosPastLap">{{minutosPastLap}}</span>:
+									<span ng-model="segundosPastLap">{{segundosPastLap}}</span>:
+									<span ng-model="miliSegundosPastLap">{{miliSegundosPastLap}}</span>
+								</h1>
+							</div>
 
+							<div layout = "row">
+								<h1>Lap actual- </h1>
+								<h1>
+									<span ng-model="minutosNowLap">{{minutosNowLap}}</span>:
+									<span ng-model="segundosNowLap">{{segundosNowLap}}</span>:
+									<span ng-model="miliSegundosNowLap">{{miliSegundosNowLap}}</span>
+								</h1>
+							</div>
+						</md-whiteframe>
+
+				    </div>
+
+				    <div>
+				    	<md-button ng-click="startSW()" class="md-raised">
+				        	START
+				    	</md-button>
+
+				    	<md-button ng-click="stopSW()" class="md-raised">
+				        	STOP
+				    	</md-button>
 				    </div>
 
 				</div>
